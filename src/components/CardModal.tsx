@@ -133,7 +133,10 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
     return "Sem texto oracle disponível.";
   };
 
-  const cardImage = card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal;
+  const isPlaceholder = card.image_status === 'placeholder' || card.image_status === 'missing';
+  const cardImage = (!isPlaceholder) 
+    ? (card.image_uris?.normal || card.card_faces?.[0]?.image_uris?.normal)
+    : (initialCard.image_uris?.normal || initialCard.card_faces?.[0]?.image_uris?.normal);
 
   const formatLegality = (status: string) => {
     if (!status) return { label: 'Desconhecido', color: 'text-white/10 bg-white/5 border-white/5' };
