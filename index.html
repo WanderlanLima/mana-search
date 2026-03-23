@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Magic Card Search</title>
+    <script type="text/javascript">
+      // Global error handler to help diagnose blank screen issues on GH Pages
+      window.onerror = function(msg, url, line, col, error) {
+        var body = document.body;
+        if (body) {
+          var div = document.createElement('div');
+          div.style.color = 'red';
+          div.style.padding = '20px';
+          div.style.backgroundColor = 'white';
+          div.style.position = 'fixed';
+          div.style.top = '0';
+          div.style.left = '0';
+          div.style.zIndex = '9999';
+          div.innerHTML = '<h3>Erro de Carregamento:</h3><p>' + msg + '</p><p>URL: ' + url + '</p><p>Linha: ' + line + '</p>';
+          body.appendChild(div);
+        }
+        return false;
+      };
+    </script>
+    <script type="text/javascript">
+      // Single Page Apps for GitHub Pages
+      // https://github.com/rafgraph/spa-github-pages
+      // This script checks to see if a redirect is present in the query string,
+      // and converts it back into the correct url and pushes it into the
+      // browser's history using window.history.replaceState(...),
+      // which will cause the browser to refresh the page without actually
+      // refreshing the page.
+      (function(l) {
+        if (l.search[1] === 'p') {
+          var decoded = l.search.slice(1).split('&').map(function(s) { 
+            return s.replace(/~and~/g, '&') 
+          }).filter(function(v) {
+            return v.slice(0, 2) === 'p='
+          })[0];
+          if (decoded) {
+            window.history.replaceState(null, null,
+              l.pathname.slice(0, -1) + decoded.slice(2) +
+              (l.search.split('&q=').length > 1 ? '?' + l.search.split('&q=')[1].replace(/~and~/g, '&') : '') +
+              l.hash
+            );
+          }
+        }
+      }(window.location))
+    </script>
+  </head>
+  <body>
+    <div id="root">
+      <div style="background-color: #050505; color: white; height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif;">
+        Carregando Mana Search...
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

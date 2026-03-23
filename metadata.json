@@ -1,0 +1,5 @@
+{
+  "name": "Mana Search - MTG em Português",
+  "description": "Busque cartas de Magic: The Gathering com tradução automática para Português e suporte à sintaxe do Scryfall.",
+  "requestFramePermissions": []
+}
