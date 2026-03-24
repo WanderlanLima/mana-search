@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Ghost, Loader2, CheckCircle2, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { keywordService } from '../lib/keywordService';
+
 interface NightmareStatusProps {
   isOpen: boolean;
   onClose: () => void;
@@ -16,17 +18,9 @@ export const NightmareStatus: React.FC<NightmareStatusProps> = ({ isOpen, onClos
     if (!isOpen) return;
 
     const checkStatus = async () => {
-      try {
-        const response = await fetch('keywords.json');
-        if (response.ok) {
-          const data = await response.json();
-          const keys = Object.keys(data.keywords || {});
-          setKeywordCount(keys.length);
-          setKeywords(keys);
-        }
-      } catch (error) {
-        console.error("NightmareStatus: Error fetching status", error);
-      }
+      await keywordService.initialize();
+      setKeywordCount(keywordService.getKeywordCount());
+      setKeywords(Object.keys(keywordService.getAllDefinitions()));
     };
 
     checkStatus();

@@ -47,26 +47,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
   };
 
   const getKeywordsInText = (text: string) => {
-    if (!text) return [];
-    const keywords = keywordService.getKeywords();
-    if (keywords.length === 0) return [];
-
-    const foundKeywords = new Set<string>();
-    const lowerText = text.toLowerCase();
-
-    // Sort keywords by length descending to avoid matching parts of longer keywords
-    const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
-
-    for (const kw of sortedKeywords) {
-      // Use word boundaries to match whole words/phrases
-      const escapedKw = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b${escapedKw}\\b`, 'gi');
-      if (regex.test(text)) {
-        foundKeywords.add(kw);
-      }
-    }
-
-    return Array.from(foundKeywords);
+    return keywordService.findKeywordsInText(text);
   };
 
   const renderText = (text: string) => {

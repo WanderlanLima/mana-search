@@ -124,9 +124,8 @@ export default function App() {
 
   const searchKeywordsOnly = async () => {
     try {
-      const response = await fetch('keywords.json');
-      const data = await response.json();
-      const keys = Object.keys(data.keywords || {});
+      await keywordService.initialize();
+      const keys = Object.keys(keywordService.getAllDefinitions());
       if (keys.length > 0) {
         // Search for the first 3 keywords joined by OR
         const searchQuery = keys.slice(0, 3).join(' OR ');

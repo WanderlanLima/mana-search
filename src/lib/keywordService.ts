@@ -63,20 +63,30 @@ class KeywordService {
     this.initPromise = (async () => {
       try {
         // 🌙 Fetch keywords from our static JSON file
-        // This works on both local server and GitHub Pages
-        const response = await fetch('keywords.json');
+        // Using a more robust path for GitHub Pages compatibility
+        const basePath = import.meta.env.BASE_URL || './';
+        const url = `${basePath.endsWith('/') ? basePath : basePath + '/'}keywords.json`.replace(/\/+/g, '/');
+        
+        console.log(`KeywordService: Fetching keywords from ${url}`);
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch keywords: ${response.status} ${response.statusText}`);
+        }
+
         const data = await response.json();
         
         if (data && data.keywords) {
           this.definitions = data.keywords;
           this.updateKeywordList();
-          console.log(`KeywordService: Loaded ${this.keywords.length} keyword variations. Sample: ${this.keywords.slice(0, 5).join(', ')}`);
+          this.saveToStorage(); // Save the fresh data to localStorage
+          console.log(`KeywordService: Successfully loaded ${this.keywords.length} keyword variations.`);
         }
         
         this.isInitialized = true;
-        console.log(`KeywordService: Loaded ${this.keywords.length} keyword variations from Nightmare DB.`);
       } catch (error) {
-        console.error("KeywordService: Error fetching keywords from Nightmare API", error);
+        console.error("KeywordService: Error initializing keywords", error);
+        // If fetch fails, we still have the data from loadFromStorage() if it was there
       }
     })();
 
@@ -84,8 +94,15 @@ class KeywordService {
   }
 
   getKeywords() {
-    // console.log(`KeywordService: Returning ${this.keywords.length} keywords.`);
     return this.keywords;
+  }
+
+  getKeywordCount() {
+    return this.keywords.length;
+  }
+
+  getAllDefinitions() {
+    return this.definitions;
   }
 
   isKeyword(text: string): boolean {
@@ -106,13 +123,13 @@ class KeywordService {
   findKeywordsInText(text: string): string[] {
     if (!text) return [];
     const found: string[] = [];
-    const lowerText = text.toLowerCase();
     
     for (const keyword of this.keywords) {
-      const lowerKeyword = keyword.toLowerCase();
-      // Use word boundaries to avoid partial matches (e.g., "Flying" in "Flyings")
-      const regex = new RegExp(`\\b${lowerKeyword}\\b`, 'g');
-      if (regex.test(lowerText)) {
+      // Escape keyword for regex and use word boundaries
+      const escapedKw = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedKw}\\b`, 'gi');
+      
+      if (regex.test(text)) {
         found.push(keyword);
       }
     }
