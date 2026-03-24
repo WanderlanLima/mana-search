@@ -4,7 +4,9 @@ import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu 
 import { scryfall, ScryfallCard } from './lib/scryfall';
 import { CardItem } from './components/CardItem';
 import { CardModal } from './components/CardModal';
+import { NightmareStatus } from './components/NightmareStatus';
 import { cn } from './lib/utils';
+import { keywordService } from './lib/keywordService';
 
 export default function App() {
   const [query, setQuery] = useState('');
@@ -19,6 +21,11 @@ export default function App() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [quickResults, setQuickResults] = useState<ScryfallCard[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+
+  // Initialize keyword service on startup
+  useEffect(() => {
+    keywordService.initialize();
+  }, []);
 
   // Load history from localStorage
   useEffect(() => {
@@ -342,6 +349,8 @@ export default function App() {
           />
         )}
       </AnimatePresence>
+
+      <NightmareStatus />
 
       {/* Close history on click outside */}
       {showDropdown && (

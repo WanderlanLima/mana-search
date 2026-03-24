@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Languages, BookOpen, Info, ExternalLink, Loader2 } from 'lucide-react';
+import { X, Languages, BookOpen, Info, ExternalLink, Loader2, HelpCircle } from 'lucide-react';
 import { ScryfallCard, scryfall, ScryfallRule } from '../lib/scryfall';
 import { translateToPTBR, translateRules } from '../lib/gemini';
 import { cn } from '../lib/utils';
+import { keywordService } from '../lib/keywordService';
 
 interface CardModalProps {
   card: ScryfallCard;
@@ -19,6 +20,74 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
   const [loadingRules, setLoadingRules] = useState(false);
   const [activeTab, setActiveTab] = useState<'details' | 'rules'>('details');
   const [isTranslateActive, setIsTranslateActive] = useState(false);
+  const [selectedKeyword, setSelectedKeyword] = useState<string | null>(null);
+  const [keywordDefinition, setKeywordDefinition] = useState<string | null>(null);
+  const [loadingKeyword, setLoadingKeyword] = useState(false);
+  const [keywordsLoaded, setKeywordsLoaded] = useState(false);
+
+  useEffect(() => {
+    const initKeywords = async () => {
+      await keywordService.initialize();
+      setKeywordsLoaded(true);
+    };
+    initKeywords();
+  }, []);
+
+  const handleKeywordClick = async (keyword: string) => {
+    setSelectedKeyword(keyword);
+    setLoadingKeyword(true);
+    try {
+      const definition = await keywordService.getDefinition(keyword);
+      setKeywordDefinition(definition);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingKeyword(false);
+    }
+  };
+
+  const renderTextWithKeywords = (text: string) => {
+    if (!text) return text;
+    
+    const keywords = keywordService.getKeywords();
+    console.log(`renderTextWithKeywords: Rendering text with ${keywords.length} keywords. Loaded state: ${keywordsLoaded}`);
+    if (keywords.length === 0) return text;
+
+    // Create a regex that matches any of the keywords as whole words
+    // We escape special characters and join with |
+    // We sort by length descending to match longer keywords first (e.g. "First Strike" before "Strike")
+    const escapedKeywords = [...keywords]
+      .sort((a, b) => b.length - a.length)
+      .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+    
+    // Using a regex with capturing group to split the text
+    // We use \b for word boundaries, but for Portuguese we might need more flexibility
+    // However, \b should work for spaces and punctuation.
+    const regex = new RegExp(`(\\b(?:${escapedKeywords.join('|')})\\b)`, 'gi');
+    
+    const parts = text.split(regex);
+    console.log(`renderTextWithKeywords: Split text into ${parts.length} parts.`);
+    
+    return parts.map((part, i) => {
+      // Check if this part is a keyword (case-insensitive)
+      if (keywordService.isKeyword(part)) {
+        return (
+          <button
+            key={`${part}-${i}`}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleKeywordClick(part);
+            }}
+            className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-400/20 rounded text-blue-300 font-bold transition-all cursor-help group mx-0.5 align-baseline"
+          >
+            {part}
+            <HelpCircle size={10} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+          </button>
+        );
+      }
+      return part;
+    });
+  };
 
   // Try to fetch Portuguese version of the card on mount
   useEffect(() => {
@@ -255,7 +324,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                   </div>
                   
                   <div className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 text-sm md:text-base leading-relaxed whitespace-pre-wrap font-serif">
-                    {getOracleText()}
+                    {renderTextWithKeywords(getOracleText())}
                   </div>
 
                   {translatedText && (
@@ -268,7 +337,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                         <Languages size={12} /> Tradução PT-BR
                       </h3>
                       <div className="p-5 bg-white/5 rounded-2xl border border-white/10 text-sm md:text-base leading-relaxed whitespace-pre-wrap italic font-serif text-white/90">
-                        {translatedText}
+                        {renderTextWithKeywords(translatedText)}
                       </div>
                     </motion.div>
                   )}
@@ -371,6 +440,68 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
             </a>
           </div>
         </div>
+
+        {/* Keyword Definition Overlay */}
+        <AnimatePresence>
+          {selectedKeyword && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 z-50 flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+              onClick={() => {
+                setSelectedKeyword(null);
+                setKeywordDefinition(null);
+              }}
+            >
+              <motion.div
+                initial={{ y: 100, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                exit={{ y: 100, opacity: 0 }}
+                className="w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-3xl p-6 shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
+                      <BookOpen size={16} className="text-white" />
+                    </div>
+                    <h4 className="text-lg font-bold tracking-tight capitalize">{selectedKeyword}</h4>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setSelectedKeyword(null);
+                      setKeywordDefinition(null);
+                    }}
+                    className="p-2 hover:bg-white/5 rounded-full transition-colors"
+                  >
+                    <X size={20} />
+                  </button>
+                </div>
+
+                <div className="min-h-[100px] flex flex-col justify-center">
+                  {loadingKeyword ? (
+                    <div className="flex flex-col items-center gap-3 py-4 text-white/20">
+                      <Loader2 size={24} className="animate-spin" />
+                      <p className="text-[10px] uppercase tracking-widest font-black">Consultando Regras...</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      <p className="text-white/80 leading-relaxed text-sm md:text-base font-serif italic">
+                        "{keywordDefinition}"
+                      </p>
+                      <div className="pt-4 border-t border-white/5">
+                        <p className="text-[10px] text-white/20 uppercase tracking-widest font-bold">
+                          Fonte: Comprehensive Rules (Traduzido por IA)
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     </motion.div>
   );

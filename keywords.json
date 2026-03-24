@@ -1,0 +1,82 @@
+{
+  "keywords": {
+    "flying": {
+      "name": "Flying",
+      "translatedName": "Voar",
+      "definition": "Esta criatura não pode ser bloqueada, exceto por criaturas com voar ou alcance.",
+      "lastUpdated": 1711247687000
+    },
+    "trample": {
+      "name": "Trample",
+      "translatedName": "Atropelar",
+      "definition": "Esta criatura pode causar o excesso de dano de combate ao jogador ou planeswalker que estiver defendendo.",
+      "lastUpdated": 1711247687000
+    },
+    "haste": {
+      "name": "Haste",
+      "translatedName": "Ímpeto",
+      "definition": "Esta criatura pode atacar e {T} assim que entra sob seu controle.",
+      "lastUpdated": 1711247687000
+    },
+    "lifelink": {
+      "name": "Lifelink",
+      "translatedName": "Vínculo com a vida",
+      "definition": "O dano causado por esta criatura também faz com que você ganhe essa mesma quantidade de pontos de vida.",
+      "lastUpdated": 1711247687000
+    },
+    "deathtouch": {
+      "name": "Deathtouch",
+      "translatedName": "Toque mortífero",
+      "definition": "Qualquer quantidade de dano que esta criatura causar a uma criatura é suficiente para destruí-la.",
+      "lastUpdated": 1711247687000
+    },
+    "vigilance": {
+      "name": "Vigilance",
+      "translatedName": "Vigilância",
+      "definition": "Atacar não faz com que esta criatura seja virada.",
+      "lastUpdated": 1711247687000
+    },
+    "reach": {
+      "name": "Reach",
+      "translatedName": "Alcance",
+      "definition": "Esta criatura pode bloquear criaturas com voar.",
+      "lastUpdated": 1711247687000
+    },
+    "menace": {
+      "name": "Menace",
+      "translatedName": "Ameaça",
+      "definition": "Esta criatura não pode ser bloqueada, exceto por duas ou mais criaturas.",
+      "lastUpdated": 1711247687000
+    },
+    "indestructible": {
+      "name": "Indestructible",
+      "translatedName": "Indestrutível",
+      "definition": "Efeitos que dizem \"destrua\" não destroem esta criatura. Se esta for uma criatura, o dano letal não a destrói.",
+      "lastUpdated": 1711247687000
+    },
+    "hexproof": {
+      "name": "Hexproof",
+      "translatedName": "Resistência a magia",
+      "definition": "Esta criatura não pode ser alvo de mágicas ou habilidades que seus oponentes controlam.",
+      "lastUpdated": 1711247687000
+    },
+    "scry": {
+      "name": "Scry",
+      "translatedName": "Vaticinar",
+      "definition": "Olhe os cards do topo do seu grimório. Você pode colocar qualquer número deles no fundo do seu grimório e o restante no topo em qualquer ordem.",
+      "lastUpdated": 1711247687000
+    },
+    "ward": {
+      "name": "Ward",
+      "translatedName": "Salvaguarda",
+      "definition": "Toda vez que esta criatura se tornar alvo de uma mágica ou habilidade que um oponente controla, anule-a, a menos que aquele jogador pague o custo adicional.",
+      "lastUpdated": 1711247687000
+    },
+    "prowess": {
+      "name": "Prowess",
+      "translatedName": "Destreza",
+      "definition": "Toda vez que você conjura uma mágica que não seja de criatura, esta criatura recebe +1/+1 até o final do turno.",
+      "lastUpdated": 1711247687000
+    }
+  }
+}
