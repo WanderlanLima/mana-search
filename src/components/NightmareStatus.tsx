@@ -17,7 +17,7 @@ export const NightmareStatus: React.FC<NightmareStatusProps> = ({ isOpen, onClos
 
     const checkStatus = async () => {
       try {
-        const response = await fetch('/api/keywords');
+        const response = await fetch('/keywords.json');
         if (response.ok) {
           const data = await response.json();
           const keys = Object.keys(data.keywords || {});

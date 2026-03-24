@@ -4,7 +4,7 @@ import path from 'path';
 import axios from 'axios';
 import { translateToPTBR } from './gemini';
 
-const KEYWORDS_FILE = path.join(process.cwd(), 'keywords.json');
+const KEYWORDS_FILE = path.join(process.cwd(), 'public', 'keywords.json');
 const LOG_FILE = path.join(process.cwd(), 'nightmare.log');
 
 function log(message: string) {

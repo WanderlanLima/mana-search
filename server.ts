@@ -17,7 +17,7 @@ async function startServer() {
 
   // API para as keywords
   app.get("/api/keywords", (req, res) => {
-    const KEYWORDS_FILE = path.join(process.cwd(), 'keywords.json');
+    const KEYWORDS_FILE = path.join(process.cwd(), 'public', 'keywords.json');
     if (fs.existsSync(KEYWORDS_FILE)) {
       const db = JSON.parse(fs.readFileSync(KEYWORDS_FILE, 'utf-8'));
       res.json(db);
