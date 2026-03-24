@@ -1,6 +1,16 @@
 import { GoogleGenAI, ThinkingLevel } from "@google/genai";
 
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+const getApiKey = () => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key || key === "") {
+    console.warn("GEMINI_API_KEY is missing. Translation will be disabled.");
+    return null;
+  }
+  return key;
+};
+
+const apiKey = getApiKey();
+const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
 
 // Simple in-memory cache to avoid redundant translations
 const translationCache: Record<string, string> = {};
@@ -8,6 +18,7 @@ const rulesCache: Record<string, string[]> = {};
 
 export const translateToPTBR = async (text: string, context: string = "Magic: The Gathering card text or rules") => {
   if (!text || text.trim() === "") return text;
+  if (!ai) return text;
   
   const cacheKey = `${context}:${text}`;
   if (translationCache[cacheKey]) return translationCache[cacheKey];
@@ -32,6 +43,7 @@ export const translateToPTBR = async (text: string, context: string = "Magic: Th
 
 export const translateRules = async (rules: string[]) => {
   if (!rules.length) return [];
+  if (!ai) return rules;
   
   const cacheKey = rules.join("|");
   if (rulesCache[cacheKey]) return rulesCache[cacheKey];
