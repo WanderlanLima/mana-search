@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Languages, BookOpen, Info, ExternalLink, Loader2, HelpCircle } from 'lucide-react';
+import { X, Languages, BookOpen, Info, ExternalLink, Loader2, HelpCircle, Sparkles } from 'lucide-react';
 import { ScryfallCard, scryfall, ScryfallRule } from '../lib/scryfall';
 import { translateToPTBR, translateRules } from '../lib/gemini';
 import { cn } from '../lib/utils';
@@ -46,47 +46,31 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
     }
   };
 
-  const renderTextWithKeywords = (text: string) => {
-    if (!text) return text;
-    
+  const getKeywordsInText = (text: string) => {
+    if (!text) return [];
     const keywords = keywordService.getKeywords();
-    console.log(`renderTextWithKeywords: Rendering text with ${keywords.length} keywords. Loaded state: ${keywordsLoaded}`);
-    if (keywords.length === 0) return text;
+    if (keywords.length === 0) return [];
 
-    // Create a regex that matches any of the keywords as whole words
-    // We escape special characters and join with |
-    // We sort by length descending to match longer keywords first (e.g. "First Strike" before "Strike")
-    const escapedKeywords = [...keywords]
-      .sort((a, b) => b.length - a.length)
-      .map(k => k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-    
-    // Using a regex with capturing group to split the text
-    // We use \b for word boundaries, but for Portuguese we might need more flexibility
-    // However, \b should work for spaces and punctuation.
-    const regex = new RegExp(`(\\b(?:${escapedKeywords.join('|')})\\b)`, 'gi');
-    
-    const parts = text.split(regex);
-    console.log(`renderTextWithKeywords: Split text into ${parts.length} parts.`);
-    
-    return parts.map((part, i) => {
-      // Check if this part is a keyword (case-insensitive)
-      if (keywordService.isKeyword(part)) {
-        return (
-          <button
-            key={`${part}-${i}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              handleKeywordClick(part);
-            }}
-            className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-400/20 rounded text-blue-300 font-bold transition-all cursor-help group mx-0.5 align-baseline"
-          >
-            {part}
-            <HelpCircle size={10} className="opacity-40 group-hover:opacity-100 transition-opacity" />
-          </button>
-        );
+    const foundKeywords = new Set<string>();
+    const lowerText = text.toLowerCase();
+
+    // Sort keywords by length descending to avoid matching parts of longer keywords
+    const sortedKeywords = [...keywords].sort((a, b) => b.length - a.length);
+
+    for (const kw of sortedKeywords) {
+      // Use word boundaries to match whole words/phrases
+      const escapedKw = kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedKw}\\b`, 'gi');
+      if (regex.test(text)) {
+        foundKeywords.add(kw);
       }
-      return part;
-    });
+    }
+
+    return Array.from(foundKeywords);
+  };
+
+  const renderText = (text: string) => {
+    return text;
   };
 
   // Try to fetch Portuguese version of the card on mount
@@ -324,7 +308,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                   </div>
                   
                   <div className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 text-sm md:text-base leading-relaxed whitespace-pre-wrap font-serif">
-                    {renderTextWithKeywords(getOracleText())}
+                    {renderText(getOracleText())}
                   </div>
 
                   {translatedText && (
@@ -337,10 +321,43 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                         <Languages size={12} /> Tradução PT-BR
                       </h3>
                       <div className="p-5 bg-white/5 rounded-2xl border border-white/10 text-sm md:text-base leading-relaxed whitespace-pre-wrap italic font-serif text-white/90">
-                        {renderTextWithKeywords(translatedText)}
+                        {renderText(translatedText)}
                       </div>
                     </motion.div>
                   )}
+
+                  {/* Keywords Section */}
+                  {(() => {
+                    const foundKeywords = [
+                      ...getKeywordsInText(getOracleText()),
+                      ...(translatedText ? getKeywordsInText(translatedText) : [])
+                    ];
+                    // Remove duplicates
+                    const uniqueKeywords = Array.from(new Set(foundKeywords));
+                    
+                    if (uniqueKeywords.length > 0) {
+                      return (
+                        <div className="space-y-3 pt-2">
+                          <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-black flex items-center gap-2">
+                            <Sparkles size={12} /> Keywords encontrados:
+                          </h3>
+                          <div className="flex flex-wrap gap-2">
+                            {uniqueKeywords.map((kw, i) => (
+                              <button
+                                key={`${kw}-${i}`}
+                                onClick={() => handleKeywordClick(kw)}
+                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs font-bold transition-all group"
+                              >
+                                {kw}
+                                <HelpCircle size={12} className="opacity-40 group-hover:opacity-100 transition-opacity" />
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
 
                 {/* Legality Section */}
