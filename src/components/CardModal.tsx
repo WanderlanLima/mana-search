@@ -156,9 +156,9 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
       const textToTranslate = getOracleText();
       const ruleComments = rules.map(r => r.comment);
 
-      // Parallelize translation of text and rules
+      // Parallelize translation of text and rules using Gemini
       const [translated, translatedR] = await Promise.all([
-        translateToPTBR(textToTranslate),
+        translateToPTBR(textToTranslate, 'oracle'),
         ruleComments.length > 0 ? translateRules(ruleComments) : Promise.resolve([])
       ]);
 

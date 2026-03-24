@@ -21,6 +21,8 @@ export default function App() {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [quickResults, setQuickResults] = useState<ScryfallCard[]>([]);
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+  const [nightmareClicks, setNightmareClicks] = useState(0);
+  const [isNightmareOpen, setIsNightmareOpen] = useState(false);
 
   // Initialize keyword service on startup
   useEffect(() => {
@@ -105,13 +107,46 @@ export default function App() {
     handleSearch(query, nextPage);
   };
 
+  const handleNightmareClick = () => {
+    const newClicks = nightmareClicks + 1;
+    setNightmareClicks(newClicks);
+    
+    if (newClicks >= 10) {
+      setIsNightmareOpen(true);
+      setNightmareClicks(0);
+    }
+
+    // Reset clicks after 2 seconds of inactivity
+    const timer = setTimeout(() => setNightmareClicks(0), 2000);
+    return () => clearTimeout(timer);
+  };
+
+  const searchKeywordsOnly = async () => {
+    try {
+      const response = await fetch('/api/keywords');
+      const data = await response.json();
+      const keys = Object.keys(data.keywords || {});
+      if (keys.length > 0) {
+        // Search for the first 3 keywords joined by OR
+        const searchQuery = keys.slice(0, 3).join(' OR ');
+        setQuery(searchQuery);
+        handleSearch(searchQuery, 1);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-white selection:text-black">
       {/* Header / Search Bar */}
       <header className="sticky top-0 z-40 bg-[#050505]/80 backdrop-blur-xl border-b border-white/5">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
+            <div 
+              className="flex items-center gap-2 cursor-pointer select-none active:scale-95 transition-transform"
+              onClick={handleNightmareClick}
+            >
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
                 <Sparkles className="text-black" size={18} />
               </div>
@@ -350,7 +385,11 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      <NightmareStatus />
+      <NightmareStatus 
+        isOpen={isNightmareOpen} 
+        onClose={() => setIsNightmareOpen(false)} 
+        onSearchKeywords={searchKeywordsOnly}
+      />
 
       {/* Close history on click outside */}
       {showDropdown && (

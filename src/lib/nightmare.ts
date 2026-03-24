@@ -2,6 +2,7 @@
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
+import { translateToPTBR } from './gemini';
 
 const KEYWORDS_FILE = path.join(process.cwd(), 'keywords.json');
 const LOG_FILE = path.join(process.cwd(), 'nightmare.log');
@@ -24,23 +25,7 @@ interface KeywordsDb {
   keywords: Record<string, KeywordEntry>;
 }
 
-// Simple translation function (no-AI, using Google Translate endpoint)
-async function translateToPTBR(text: string): Promise<string> {
-  if (!text || text.trim() === "") return text;
-  try {
-    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=pt&dt=t&q=${encodeURIComponent(text)}`;
-    const response = await axios.get(url);
-    const data = response.data;
-    if (data && data[0]) {
-      return data[0].map((part: any) => part[0]).join('');
-    }
-    return text;
-  } catch (error) {
-    log(`Nightmare: Translation error for "${text.substring(0, 20)}...": ${error}`);
-    return text;
-  }
-}
-
+// Helper to find reminder text
 async function fetchReminderText(keyword: string): Promise<string | null> {
   try {
     // Strategy: Use Scryfall's "has:reminder" which is very effective
@@ -124,9 +109,9 @@ export async function runNightmare() {
         if (reminderText) {
           log(`🌙 NIGHTMARE: Definição encontrada para "${keyword}": ${reminderText.substring(0, 50)}...`);
           
-          // Translate both name and definition
-          const translatedName = await translateToPTBR(keyword);
-          const definition = await translateToPTBR(reminderText);
+          // Translate both name and definition using specialized MTG AI
+          const translatedName = await translateToPTBR(keyword, 'keyword');
+          const definition = await translateToPTBR(reminderText, 'definition');
           
           db.keywords[key] = {
             name: keyword,
