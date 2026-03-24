@@ -1,67 +1,51 @@
-import { GoogleGenAI, ThinkingLevel } from "@google/genai";
-
-const getApiKey = () => {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key || key === "") {
-    console.warn("GEMINI_API_KEY is missing. Translation will be disabled.");
-    return null;
-  }
-  return key;
-};
-
-const apiKey = getApiKey();
-const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
-
-// Simple in-memory cache to avoid redundant translations
-const translationCache: Record<string, string> = {};
-const rulesCache: Record<string, string[]> = {};
-
-export const translateToPTBR = async (text: string, context: string = "Magic: The Gathering card text or rules") => {
+// Free Google Translate API implementation (no key required)
+const translateText = async (text: string, target: string = 'pt') => {
   if (!text || text.trim() === "") return text;
-  if (!ai) return text;
-  
-  const cacheKey = `${context}:${text}`;
-  if (translationCache[cacheKey]) return translationCache[cacheKey];
   
   try {
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Traduza para PT-BR (Magic: The Gathering). Retorne APENAS a tradução.\n\nTexto: ${text}`,
-      config: {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }
-      }
-    });
+    const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=${target}&dt=t&q=${encodeURIComponent(text)}`;
+    const response = await fetch(url);
+    const data = await response.json();
     
-    const result = response.text || text;
-    translationCache[cacheKey] = result;
-    return result;
+    // Google Translate returns an array of arrays for parts of the text
+    if (data && data[0]) {
+      return data[0].map((part: any) => part[0]).join('');
+    }
+    return text;
   } catch (error) {
     console.error("Translation error:", error);
     return text;
   }
 };
 
+// Simple in-memory cache to avoid redundant translations
+const translationCache: Record<string, string> = {};
+const rulesCache: Record<string, string[]> = {};
+
+export const translateToPTBR = async (text: string, _context: string = "") => {
+  if (!text || text.trim() === "") return text;
+  
+  if (translationCache[text]) return translationCache[text];
+  
+  const result = await translateText(text, 'pt');
+  translationCache[text] = result;
+  return result;
+};
+
 export const translateRules = async (rules: string[]) => {
   if (!rules.length) return [];
-  if (!ai) return rules;
   
   const cacheKey = rules.join("|");
   if (rulesCache[cacheKey]) return rulesCache[cacheKey];
   
   try {
-    const combinedRules = rules.join("\n---\n");
-    const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
-      contents: `Traduza as regras de MTG para PT-BR. Use "---" como separador. Retorne APENAS as traduções.\n\nRegras:\n${combinedRules}`,
-      config: {
-        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL }
-      }
-    });
+    // Translate each rule individually to avoid URL length limits
+    const translatedRules = await Promise.all(
+      rules.map(rule => translateText(rule, 'pt'))
+    );
     
-    const translatedText = response.text || combinedRules;
-    const result = translatedText.split("\n---\n").map(r => r.trim());
-    rulesCache[cacheKey] = result;
-    return result;
+    rulesCache[cacheKey] = translatedRules;
+    return translatedRules;
   } catch (error) {
     console.error("Rules translation error:", error);
     return rules;
