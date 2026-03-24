@@ -175,9 +175,9 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
         className="bg-[#0a0a0a] w-full h-full md:h-auto md:max-w-5xl md:max-h-[90vh] overflow-hidden md:rounded-3xl border-t md:border border-white/10 flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Card Image Section */}
-        <div className="w-full md:w-[45%] p-6 md:p-10 flex items-center justify-center bg-gradient-to-b from-white/5 to-transparent border-b md:border-b-0 md:border-r border-white/5 shrink-0">
-          <div className="relative group w-full max-w-[320px] md:max-w-full">
+        {/* Card Image Section (Desktop) */}
+        <div className="hidden md:flex w-[45%] p-10 items-center justify-center bg-gradient-to-b from-white/5 to-transparent border-r border-white/5 shrink-0">
+          <div className="relative group w-full">
             <img
               src={cardImage}
               alt={card.name}
@@ -187,27 +187,38 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
           </div>
         </div>
 
-        {/* Info Section */}
-        <div className="flex-1 flex flex-col min-h-0">
-          <div className="p-6 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#0a0a0a] z-10">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
+          {/* Mobile Image Header (Visible only on mobile) */}
+          <div className="md:hidden w-full p-4 bg-gradient-to-b from-white/5 to-transparent border-b border-white/5 flex justify-center">
+            <div className="w-full max-w-[200px]">
+              <img
+                src={cardImage}
+                alt={card.name}
+                className="w-full rounded-[4.75% / 3.5%] shadow-2xl"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+          </div>
+
+          <div className="p-5 md:p-6 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-xl z-20">
             <div className="min-w-0">
-              <h2 className="text-xl md:text-2xl font-bold tracking-tight truncate">{card.printed_name || card.name}</h2>
-              <p className="text-white/40 text-xs md:text-sm font-mono truncate">{card.type_line}</p>
+              <h2 className="text-lg md:text-2xl font-bold tracking-tight truncate">{card.printed_name || card.name}</h2>
+              <p className="text-white/40 text-[10px] md:text-sm font-mono truncate">{card.type_line}</p>
             </div>
             <button
               onClick={onClose}
-              className="p-3 hover:bg-white/5 rounded-full transition-colors shrink-0"
+              className="p-2 md:p-3 hover:bg-white/5 rounded-full transition-colors shrink-0"
             >
-              <X size={24} />
+              <X size={20} md:size={24} />
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex border-b border-white/5 sticky top-[81px] bg-[#0a0a0a] z-10">
+          <div className="flex border-b border-white/5 sticky top-[69px] md:top-[81px] bg-[#0a0a0a]/80 backdrop-blur-xl z-20">
             <button
               onClick={() => setActiveTab('details')}
               className={cn(
-                "flex-1 py-4 text-xs md:text-sm font-black uppercase tracking-[0.2em] transition-all border-b-2",
+                "flex-1 py-3 md:py-4 text-[10px] md:text-sm font-black uppercase tracking-[0.2em] transition-all border-b-2",
                 activeTab === 'details' ? "border-white text-white bg-white/5" : "border-transparent text-white/20 hover:text-white/40"
               )}
             >
@@ -216,7 +227,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
             <button
               onClick={() => setActiveTab('rules')}
               className={cn(
-                "flex-1 py-4 text-xs md:text-sm font-black uppercase tracking-[0.2em] transition-all border-b-2",
+                "flex-1 py-3 md:py-4 text-[10px] md:text-sm font-black uppercase tracking-[0.2em] transition-all border-b-2",
                 activeTab === 'rules' ? "border-white text-white bg-white/5" : "border-transparent text-white/20 hover:text-white/40"
               )}
             >
@@ -224,7 +235,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 space-y-8 pb-24 md:pb-6">
+          <div className="p-5 md:p-6 space-y-6 md:space-y-8 pb-32 md:pb-6">
             {activeTab === 'details' ? (
               <>
                 {/* Oracle Text Section */}
