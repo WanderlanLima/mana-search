@@ -124,7 +124,7 @@ export default function App() {
 
   const searchKeywordsOnly = async () => {
     try {
-      const response = await fetch('/keywords.json');
+      const response = await fetch('keywords.json');
       const data = await response.json();
       const keys = Object.keys(data.keywords || {});
       if (keys.length > 0) {

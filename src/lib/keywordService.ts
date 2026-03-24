@@ -64,7 +64,7 @@ class KeywordService {
       try {
         // 🌙 Fetch keywords from our static JSON file
         // This works on both local server and GitHub Pages
-        const response = await fetch('/keywords.json');
+        const response = await fetch('keywords.json');
         const data = await response.json();
         
         if (data && data.keywords) {

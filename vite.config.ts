@@ -7,8 +7,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
-    // Se estiver usando GitHub Pages com um subdiretório (ex: /mana-search/),
-    // adicione: base: '/mana-search/',
+    base: './',
     plugins: [
       react(), 
       tailwindcss(),
