@@ -238,7 +238,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
         </div>
 
         {/* Content Section - Slides over on Mobile */}
-        <div className="flex-1 flex flex-col min-h-0 md:overflow-y-auto relative z-10 bg-[#030303]/60 md:bg-transparent backdrop-blur-3xl md:backdrop-blur-0 rounded-t-[40px] md:rounded-none -mt-12 md:mt-0 border-t md:border-t-0 border-white/10 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] md:shadow-none">
+        <div className="flex-1 flex flex-col min-h-0 md:overflow-y-auto relative z-10 bg-[#030303]/90 md:bg-transparent backdrop-blur-3xl md:backdrop-blur-0 rounded-t-[40px] md:rounded-none -mt-12 md:mt-0 border-t md:border-t-0 border-white/10 shadow-[0_-20px_40px_rgba(0,0,0,0.8)] md:shadow-none">
           <div className="p-6 md:p-10 space-y-8 pb-32">
             {/* Header Info */}
             <div className="space-y-2">
@@ -254,7 +254,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
             </div>
 
             {/* Tabs Navigation */}
-            <div className="flex p-1 bg-white/5 rounded-2xl w-fit">
+            <div className="flex p-1 bg-white/10 rounded-2xl w-fit">
               <button
                 onClick={() => setActiveTab('details')}
                 className={cn(
@@ -420,7 +420,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
           </div>
 
           {/* Action Footer */}
-          <div className="p-6 md:p-8 border-t border-white/5 bg-black/40 backdrop-blur-xl sticky bottom-0 z-30">
+          <div className="p-6 md:p-8 border-t border-white/5 bg-[#030303]/95 backdrop-blur-xl sticky bottom-0 z-30">
             <a
               href={card.scryfall_uri}
               target="_blank"
