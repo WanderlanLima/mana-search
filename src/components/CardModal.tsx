@@ -199,96 +199,104 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-black/90 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-6 bg-black/90 backdrop-blur-xl"
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.95, y: 40 }}
-        animate={{ scale: 1, y: 0 }}
-        exit={{ scale: 0.95, y: 40 }}
-        className="bg-[#0a0a0a] w-full h-full md:h-auto md:max-w-5xl md:max-h-[90vh] overflow-hidden md:rounded-3xl border-t md:border border-white/10 flex flex-col md:flex-row"
+        initial={{ scale: 0.9, opacity: 0, y: 40 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.9, opacity: 0, y: 40 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="glass-surface w-full h-full md:h-auto md:max-w-6xl md:max-h-[90vh] overflow-hidden md:rounded-[32px] border-white/10 flex flex-col md:flex-row relative"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Card Image Section (Desktop) */}
-        <div className="hidden md:flex w-[45%] p-10 items-center justify-center bg-gradient-to-b from-white/5 to-transparent border-r border-white/5 shrink-0">
-          <div className="relative group w-full">
+        {/* Close Button (Floating) */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 z-50 p-2 bg-black/40 hover:bg-white/10 rounded-full backdrop-blur-md transition-all border border-white/5"
+        >
+          <X size={20} />
+        </button>
+
+        {/* Card Image Section */}
+        <div className="w-full md:w-[42%] p-8 md:p-12 flex items-center justify-center bg-gradient-to-br from-purple-600/10 to-transparent border-b md:border-b-0 md:border-r border-white/5 shrink-0">
+          <motion.div 
+            initial={{ rotateY: 20, rotateX: -10 }}
+            whileHover={{ rotateY: 0, rotateX: 0 }}
+            transition={{ duration: 0.5 }}
+            className="relative group w-full max-w-[320px] md:max-w-none perspective-1000"
+          >
+            <div className="absolute -inset-4 bg-purple-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
             <img
               src={cardImage}
               alt={card.name}
-              className="w-full rounded-[4.75% / 3.5%] shadow-[0_20px_50px_rgba(0,0,0,0.5)] transition-transform duration-500 group-hover:scale-[1.02]"
+              className="w-full rounded-[4.75% / 3.5%] shadow-[0_30px_60px_rgba(0,0,0,0.8)] relative z-10"
               referrerPolicy="no-referrer"
             />
-          </div>
+          </motion.div>
         </div>
 
+        {/* Content Section */}
         <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-          {/* Mobile Image Header (Visible only on mobile) */}
-          <div className="md:hidden w-full p-4 bg-gradient-to-b from-white/5 to-transparent border-b border-white/5 flex justify-center">
-            <div className="w-full max-w-[200px]">
-              <img
-                src={cardImage}
-                alt={card.name}
-                className="w-full rounded-[4.75% / 3.5%] shadow-2xl"
-                referrerPolicy="no-referrer"
-              />
+          <div className="p-6 md:p-10 space-y-8 pb-32">
+            {/* Header Info */}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-purple-400 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
+                <Sparkles size={12} /> {card.set_name} • {card.rarity}
+              </div>
+              <h2 className="font-display text-3xl md:text-5xl font-bold tracking-tight leading-none">
+                {card.printed_name || card.name}
+              </h2>
+              <p className="text-white/40 font-mono text-xs md:text-sm uppercase tracking-widest">
+                {card.type_line}
+              </p>
             </div>
-          </div>
 
-          <div className="p-5 md:p-6 border-b border-white/5 flex justify-between items-center sticky top-0 bg-[#0a0a0a]/80 backdrop-blur-xl z-20">
-            <div className="min-w-0">
-              <h2 className="text-lg md:text-2xl font-bold tracking-tight truncate">{card.printed_name || card.name}</h2>
-              <p className="text-white/40 text-[10px] md:text-sm font-mono truncate">{card.type_line}</p>
+            {/* Tabs Navigation */}
+            <div className="flex p-1 bg-white/5 rounded-2xl w-fit">
+              <button
+                onClick={() => setActiveTab('details')}
+                className={cn(
+                  "px-6 py-2 rounded-xl text-xs font-bold transition-all",
+                  activeTab === 'details' ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white/60"
+                )}
+              >
+                Details
+              </button>
+              <button
+                onClick={() => setActiveTab('rules')}
+                className={cn(
+                  "px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+                  activeTab === 'rules' ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white/60"
+                )}
+              >
+                Rules <span className="opacity-40">{rules.length}</span>
+              </button>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 md:p-3 hover:bg-white/5 rounded-full transition-colors shrink-0"
-            >
-              <X size={20} md:size={24} />
-            </button>
-          </div>
 
-          {/* Tabs */}
-          <div className="flex border-b border-white/5 sticky top-[69px] md:top-[81px] bg-[#0a0a0a]/80 backdrop-blur-xl z-20">
-            <button
-              onClick={() => setActiveTab('details')}
-              className={cn(
-                "flex-1 py-3 md:py-4 text-[10px] md:text-sm font-black uppercase tracking-[0.2em] transition-all border-b-2",
-                activeTab === 'details' ? "border-white text-white bg-white/5" : "border-transparent text-white/20 hover:text-white/40"
-              )}
-            >
-              Detalhes
-            </button>
-            <button
-              onClick={() => setActiveTab('rules')}
-              className={cn(
-                "flex-1 py-3 md:py-4 text-[10px] md:text-sm font-black uppercase tracking-[0.2em] transition-all border-b-2",
-                activeTab === 'rules' ? "border-white text-white bg-white/5" : "border-transparent text-white/20 hover:text-white/40"
-              )}
-            >
-              Regras <span className={cn("ml-1 px-1.5 py-0.5 rounded-md text-[10px]", activeTab === 'rules' ? "bg-white text-black" : "bg-white/10 text-white/40")}>{rules.length}</span>
-            </button>
-          </div>
-
-          <div className="p-5 md:p-6 space-y-6 md:space-y-8 pb-32 md:pb-6">
             {activeTab === 'details' ? (
-              <>
-                {/* Oracle Text Section */}
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-8"
+              >
+                {/* Oracle Text */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-black">Texto Oracle</h3>
+                    <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-black">Oracle Text</h3>
                     {!translatedText && (
                       <button
                         onClick={handleTranslate}
                         disabled={loadingTranslation}
-                        className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition-all disabled:opacity-50 border border-white/5"
+                        className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest bg-purple-600/20 hover:bg-purple-600/40 text-purple-400 px-4 py-2 rounded-full transition-all disabled:opacity-50 border border-purple-500/20"
                       >
                         {loadingTranslation ? <Loader2 size={12} className="animate-spin" /> : <Languages size={12} />}
-                        Traduzir
+                        Translate to PT-BR
                       </button>
                     )}
                   </div>
                   
-                  <div className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 text-sm md:text-base leading-relaxed whitespace-pre-wrap font-serif">
+                  <div className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 text-sm md:text-lg leading-relaxed whitespace-pre-wrap font-serif text-white/80">
                     {renderText(getOracleText())}
                   </div>
 
@@ -296,158 +304,129 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                     <motion.div
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="space-y-3"
+                      className="space-y-4"
                     >
-                      <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-black flex items-center gap-2">
-                        <Languages size={12} /> Tradução PT-BR
-                      </h3>
-                      <div className="p-5 bg-white/5 rounded-2xl border border-white/10 text-sm md:text-base leading-relaxed whitespace-pre-wrap italic font-serif text-white/90">
+                      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-purple-400 font-black">
+                        <Languages size={12} /> Portuguese Translation
+                      </div>
+                      <div className="p-6 bg-purple-500/5 rounded-3xl border border-purple-500/10 text-sm md:text-lg leading-relaxed whitespace-pre-wrap italic font-serif text-purple-100/90">
                         {renderText(translatedText)}
                       </div>
                     </motion.div>
                   )}
-
-                  {/* Keywords Section */}
-                  {(() => {
-                    const foundStrings = [
-                      ...getKeywordsInText(getOracleText()),
-                      ...(translatedText ? getKeywordsInText(translatedText) : [])
-                    ];
-                    
-                    // Map found strings to their canonical keys and preferred display names
-                    const keywordMap = new Map<string, string>();
-                    const allDefs = keywordService.getAllDefinitions();
-                    
-                    foundStrings.forEach(str => {
-                      const key = keywordService.getKeywordKey(str);
-                      if (key && allDefs[key]) {
-                        const def = allDefs[key];
-                        // Prefer translated name for display, fallback to original name
-                        keywordMap.set(key, def.translatedName || def.name);
-                      }
-                    });
-                    
-                    const uniqueKeywords = Array.from(keywordMap.values());
-                    
-                    if (uniqueKeywords.length > 0) {
-                      return (
-                        <div className="space-y-3 pt-2">
-                          <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-black flex items-center gap-2">
-                            <Sparkles size={12} /> Keywords encontrados:
-                          </h3>
-                          <div className="flex flex-wrap gap-2">
-                            {uniqueKeywords.map((kw, i) => (
-                              <button
-                                key={`${kw}-${i}`}
-                                onClick={() => handleKeywordClick(kw)}
-                                className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-xs font-bold transition-all group"
-                              >
-                                {kw}
-                                <HelpCircle size={12} className="opacity-40 group-hover:opacity-100 transition-opacity" />
-                              </button>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })()}
                 </div>
 
-                {/* Legality Section */}
+                {/* Keywords */}
+                {(() => {
+                  const foundStrings = [
+                    ...getKeywordsInText(getOracleText()),
+                    ...(translatedText ? getKeywordsInText(translatedText) : [])
+                  ];
+                  
+                  const keywordMap = new Map<string, string>();
+                  const allDefs = keywordService.getAllDefinitions();
+                  
+                  foundStrings.forEach(str => {
+                    const key = keywordService.getKeywordKey(str);
+                    if (key && allDefs[key]) {
+                      const def = allDefs[key];
+                      keywordMap.set(key, def.translatedName || def.name);
+                    }
+                  });
+                  
+                  const uniqueKeywords = Array.from(keywordMap.values());
+                  
+                  if (uniqueKeywords.length > 0) {
+                    return (
+                      <div className="space-y-4">
+                        <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-black">Keywords Identified</h3>
+                        <div className="flex flex-wrap gap-2">
+                          {uniqueKeywords.map((kw, i) => (
+                            <button
+                              key={`${kw}-${i}`}
+                              onClick={() => handleKeywordClick(kw)}
+                              className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-purple-500/20 border border-white/5 hover:border-purple-500/30 rounded-full text-xs font-bold transition-all group"
+                            >
+                              {kw}
+                              <HelpCircle size={14} className="opacity-20 group-hover:opacity-100 transition-opacity" />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+
+                {/* Legalities */}
                 <div className="space-y-4">
-                  <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-black">Formatos & Legalidade</h3>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                  <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-black">Format Legality</h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {card.legalities ? mainFormats.map((format) => {
                       const status = (card.legalities as any)[format.id];
                       const { label, color } = formatLegality(status);
                       return (
-                        <div key={format.id} className={cn("px-3 py-2 rounded-lg border text-[10px] font-bold flex justify-between items-center", color)}>
-                          <span className="opacity-60">{format.name}</span>
-                          <span>{label}</span>
+                        <div key={format.id} className={cn("px-3 py-2 rounded-xl border text-[10px] font-bold flex flex-col gap-1", color)}>
+                          <span className="opacity-40 uppercase tracking-tighter">{format.name}</span>
+                          <span className="text-xs">{label}</span>
                         </div>
                       );
-                    }) : (
-                      <div className="col-span-full p-4 bg-white/5 rounded-xl border border-white/10 text-center text-xs text-white/40">
-                        Informações de legalidade indisponíveis para esta versão.
-                      </div>
-                    )}
+                    }) : null}
                   </div>
                 </div>
-
-                {/* Info Grid */}
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-white/[0.02] rounded-2xl border border-white/5">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-1 font-black">Raridade</p>
-                    <p className="text-sm font-bold capitalize">{card.rarity}</p>
-                  </div>
-                  <div className="p-4 bg-white/[0.02] rounded-2xl border border-white/5">
-                    <p className="text-[10px] uppercase tracking-[0.2em] text-white/30 mb-1 font-black">Coleção</p>
-                    <p className="text-sm font-bold truncate">{card.set_name}</p>
-                  </div>
-                </div>
-              </>
+              </motion.div>
             ) : (
-              <div className="space-y-4">
+              <motion.div 
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="space-y-6"
+              >
                 {loadingRules ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-white/20">
-                    <Loader2 className="animate-spin mb-4" size={32} />
-                    <p className="text-xs uppercase tracking-widest font-bold">Consultando Juiz...</p>
+                  <div className="flex flex-col items-center justify-center py-20 text-white/20">
+                    <Loader2 className="animate-spin mb-4 text-purple-500" size={40} />
+                    <p className="text-xs uppercase tracking-[0.2em] font-bold">Consulting Judge...</p>
                   </div>
                 ) : rules.length === 0 ? (
-                  <div className="text-center py-12 text-white/20 bg-white/[0.02] rounded-3xl border border-dashed border-white/10">
-                    <Info className="mx-auto mb-3" size={32} />
-                    <p className="text-sm font-medium">Nenhuma regra específica encontrada para esta carta.</p>
+                  <div className="text-center py-20 bg-white/[0.02] rounded-[32px] border border-dashed border-white/10">
+                    <Info className="mx-auto mb-4 opacity-20" size={48} />
+                    <p className="text-sm text-white/40">No specific rulings found for this card.</p>
                   </div>
                 ) : (
-                  <>
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="text-[10px] uppercase tracking-[0.2em] text-white/40 font-black">Regras Oficiais (Rulings)</h3>
-                      {translatedRules.length === 0 && (
-                        <button
-                          onClick={handleTranslate}
-                          disabled={loadingTranslation}
-                          className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition-all disabled:opacity-50 border border-white/5"
-                        >
-                          {loadingTranslation ? <Loader2 size={12} className="animate-spin" /> : <Languages size={12} />}
-                          Traduzir Regras
-                        </button>
-                      )}
-                    </div>
-                    <div className="space-y-4">
-                      {rules.map((rule, idx) => (
-                        <div key={idx} className="space-y-3">
-                          <div className="p-5 bg-white/[0.02] rounded-2xl border border-white/5 text-xs md:text-sm leading-relaxed">
-                            <p className="text-white/20 mb-3 font-mono text-[10px]">{rule.published_at}</p>
-                            <p className="text-white/80">{rule.comment}</p>
+                  <div className="space-y-6">
+                    {rules.map((rule, idx) => (
+                      <div key={idx} className="group">
+                        <div className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 group-hover:border-white/10 transition-colors">
+                          <div className="flex items-center gap-2 mb-3 text-[10px] font-mono text-white/20 uppercase tracking-widest">
+                            <BookOpen size={12} /> {rule.published_at}
                           </div>
-                          {translatedRules[idx] && (
-                            <motion.div
-                              initial={{ opacity: 0, x: -10 }}
-                              animate={{ opacity: 1, x: 0 }}
-                              className="p-5 bg-white/5 rounded-2xl border border-white/10 text-xs md:text-sm leading-relaxed italic text-white/90 font-serif"
-                            >
-                              {translatedRules[idx]}
-                            </motion.div>
-                          )}
+                          <p className="text-sm md:text-base text-white/70 leading-relaxed">{rule.comment}</p>
                         </div>
-                      ))}
-                    </div>
-                  </>
+                        {translatedRules[idx] && (
+                          <motion.div
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-3 p-6 bg-purple-500/5 rounded-3xl border border-purple-500/10 text-sm md:text-base italic text-purple-100/80 font-serif"
+                          >
+                            {translatedRules[idx]}
+                          </motion.div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </div>
+              </motion.div>
             )}
           </div>
 
           {/* Action Footer */}
-          <div className="p-6 border-t border-white/5 bg-black/40 backdrop-blur-md sticky bottom-0">
+          <div className="p-8 border-t border-white/5 bg-black/40 backdrop-blur-xl sticky bottom-0 z-30">
             <a
               href={card.scryfall_uri}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 w-full py-4 bg-white text-black font-black rounded-2xl hover:bg-white/90 transition-all active:scale-[0.98] text-xs uppercase tracking-[0.2em]"
+              className="flex items-center justify-center gap-3 w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-purple-500 hover:text-white transition-all active:scale-[0.98] text-xs uppercase tracking-[0.2em]"
             >
-              Ver no Scryfall <ExternalLink size={16} />
+              View on Scryfall <ExternalLink size={16} />
             </a>
           </div>
         </div>
@@ -459,25 +438,25 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="absolute inset-0 z-50 flex items-end md:items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 z-[60] flex items-center justify-center p-6 bg-black/80 backdrop-blur-md"
               onClick={() => {
                 setSelectedKeyword(null);
                 setKeywordDefinition(null);
               }}
             >
               <motion.div
-                initial={{ y: 100, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 100, opacity: 0 }}
-                className="w-full max-w-md bg-[#1a1a1a] border border-white/10 rounded-3xl p-6 shadow-2xl"
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                className="w-full max-w-lg glass-surface rounded-[32px] p-8 border-purple-500/30 shadow-2xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-                      <BookOpen size={16} className="text-white" />
+                <div className="flex items-center justify-between mb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 bg-purple-600/20 rounded-xl flex items-center justify-center">
+                      <BookOpen size={20} className="text-purple-400" />
                     </div>
-                    <h4 className="text-lg font-bold tracking-tight capitalize">{selectedKeyword}</h4>
+                    <h4 className="font-display text-2xl font-bold tracking-tight capitalize">{selectedKeyword}</h4>
                   </div>
                   <button
                     onClick={() => {
@@ -490,21 +469,22 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                   </button>
                 </div>
 
-                <div className="min-h-[100px] flex flex-col justify-center">
+                <div className="min-h-[120px] flex flex-col justify-center">
                   {loadingKeyword ? (
-                    <div className="flex flex-col items-center gap-3 py-4 text-white/20">
-                      <Loader2 size={24} className="animate-spin" />
-                      <p className="text-[10px] uppercase tracking-widest font-black">Consultando Regras...</p>
+                    <div className="flex flex-col items-center gap-4 py-6 text-white/20">
+                      <Loader2 size={32} className="animate-spin text-purple-500" />
+                      <p className="text-[10px] uppercase tracking-[0.2em] font-black">Consulting Rules...</p>
                     </div>
                   ) : (
-                    <div className="space-y-4">
-                      <p className="text-white/80 leading-relaxed text-sm md:text-base font-serif italic">
+                    <div className="space-y-6">
+                      <p className="text-white/80 leading-relaxed text-lg font-serif italic">
                         "{keywordDefinition}"
                       </p>
-                      <div className="pt-4 border-t border-white/5">
-                        <p className="text-[10px] text-white/20 uppercase tracking-widest font-bold">
-                          Fonte: Comprehensive Rules (Traduzido por IA)
+                      <div className="pt-6 border-t border-white/5 flex items-center justify-between">
+                        <p className="text-[10px] text-white/20 uppercase tracking-[0.2em] font-bold">
+                          Comprehensive Rules (AI Translated)
                         </p>
+                        <Sparkles size={14} className="text-purple-500/40" />
                       </div>
                     </div>
                   )}

@@ -15,33 +15,34 @@ export const CardItem: React.FC<CardItemProps> = ({ card, onClick }) => {
       layout
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
-      whileHover={{ y: -5 }}
+      whileHover={{ y: -8, scale: 1.02 }}
       className="relative group cursor-pointer"
       onClick={() => onClick(card)}
     >
-      <div className="aspect-[2.5/3.5] overflow-hidden rounded-[4.75% / 3.5%] bg-white/5 border border-white/10 transition-all group-hover:border-white/30 group-hover:shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+      <div className="aspect-[2.5/3.5] overflow-hidden rounded-[4.75% / 3.5%] bg-white/5 border border-white/5 transition-all duration-500 group-hover:border-purple-500/50 group-hover:shadow-[0_0_40px_rgba(124,58,237,0.2)] relative">
         {cardImage ? (
           <img
             src={cardImage}
             alt={card.name}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
             loading="lazy"
             referrerPolicy="no-referrer"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center p-4 text-center">
-            <p className="text-xs text-white/40 font-mono uppercase tracking-widest">{card.name}</p>
+          <div className="w-full h-full flex items-center justify-center p-4 text-center bg-gradient-to-br from-white/5 to-transparent">
+            <p className="text-[10px] text-white/40 font-mono uppercase tracking-[0.2em]">{card.name}</p>
           </div>
         )}
-      </div>
-      
-      <div className="mt-2 px-1">
-        <h3 className="text-xs font-medium truncate text-white/80 group-hover:text-white transition-colors">
-          {card.name}
-        </h3>
-        <p className="text-[10px] text-white/40 truncate font-mono uppercase tracking-tighter">
-          {card.type_line}
-        </p>
+        
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-4">
+          <h3 className="text-xs font-bold text-white truncate mb-0.5">
+            {card.name}
+          </h3>
+          <p className="text-[9px] text-white/60 truncate font-mono uppercase tracking-tighter">
+            {card.type_line}
+          </p>
+        </div>
       </div>
     </motion.div>
   );
