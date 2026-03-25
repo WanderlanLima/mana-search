@@ -1,12 +1,24 @@
 import { GoogleGenAI } from "@google/genai";
 
+import { storage } from "./storage";
+
 // Initialize Gemini lazily to ensure environment variables are loaded
 let aiInstance: GoogleGenAI | null = null;
+let currentKey: string | null = null;
 
 const getAi = () => {
+  const userKey = storage.getGeminiKey();
+  
+  // If the key has changed (e.g. user updated it in settings), re-initialize
+  if (userKey !== currentKey) {
+    aiInstance = null;
+    currentKey = userKey;
+  }
+
   if (!aiInstance) {
     // Check multiple possible locations for the API key, filtering out placeholders
     const possibleKeys = [
+      userKey, // Prioritize user key from localStorage
       typeof process !== 'undefined' ? process.env?.GEMINI_API_KEY : undefined,
       (import.meta as any).env?.GEMINI_API_KEY,
       typeof window !== 'undefined' ? (window as any).process?.env?.GEMINI_API_KEY : undefined,

@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu, ArrowLeft, ArrowRight, HelpCircle } from 'lucide-react';
+import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu, ArrowLeft, ArrowRight, HelpCircle, Settings } from 'lucide-react';
 import { scryfall, ScryfallCard } from './lib/scryfall';
 import { CardItem } from './components/CardItem';
 import { CardModal } from './components/CardModal';
 import { NightmareStatus } from './components/NightmareStatus';
+import { SettingsModal } from './components/SettingsModal';
 import { cn } from './lib/utils';
 import { keywordService } from './lib/keywordService';
 
@@ -23,6 +24,7 @@ export default function App() {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [nightmareClicks, setNightmareClicks] = useState(0);
   const [isNightmareOpen, setIsNightmareOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [showKeywordsOnly, setShowKeywordsOnly] = useState(false);
   const [keywordSearch, setKeywordSearch] = useState('');
   const nightmareTimerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -155,6 +157,13 @@ export default function App() {
           
           <div className="flex items-center gap-4">
             <NightmareStatus onKeywordMode={searchKeywordsOnly} />
+            <button 
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
+              title="Configurações"
+            >
+              <Settings size={20} />
+            </button>
             <button className="p-2 hover:bg-white/5 rounded-full md:hidden">
               <Menu size={20} />
             </button>
@@ -508,6 +517,11 @@ export default function App() {
         isOpen={isNightmareOpen} 
         onClose={() => setIsNightmareOpen(false)} 
         onSearchKeywords={searchKeywordsOnly}
+      />
+
+      <SettingsModal 
+        isOpen={isSettingsOpen} 
+        onClose={() => setIsSettingsOpen(false)} 
       />
 
       {/* Close history on click outside */}
