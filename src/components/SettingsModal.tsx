@@ -33,7 +33,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
   const handleClear = () => {
     storage.clearGeminiKey();
     setApiKey('');
-    setStatus('idle');
+    setStatus('error'); // Usar o estado de erro/alerta para mostrar que foi limpo
+    setTimeout(() => setStatus('idle'), 2000);
   };
 
   return (
@@ -138,7 +139,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-400 text-xs"
                 >
                   <AlertCircle size={16} />
-                  Por favor, insira uma chave válida.
+                  {apiKey === '' ? "Chave removida com sucesso." : "Por favor, insira uma chave válida."}
                 </motion.div>
               )}
             </div>

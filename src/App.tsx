@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu, ArrowLeft, ArrowRight, HelpCircle, Settings } from 'lucide-react';
+import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu, ArrowLeft, ArrowRight, HelpCircle, Settings, Camera } from 'lucide-react';
 import { scryfall, ScryfallCard } from './lib/scryfall';
 import { CardItem } from './components/CardItem';
 import { CardModal } from './components/CardModal';
 import { NightmareStatus } from './components/NightmareStatus';
 import { SettingsModal } from './components/SettingsModal';
+import { CameraScanner } from './components/CameraScanner';
 import { cn } from './lib/utils';
 import { keywordService } from './lib/keywordService';
 
@@ -25,6 +26,7 @@ export default function App() {
   const [nightmareClicks, setNightmareClicks] = useState(0);
   const [isNightmareOpen, setIsNightmareOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [showKeywordsOnly, setShowKeywordsOnly] = useState(false);
   const [keywordSearch, setKeywordSearch] = useState('');
   const nightmareTimerRef = React.useRef<NodeJS.Timeout | null>(null);
@@ -219,6 +221,14 @@ export default function App() {
                   placeholder="Search cards (e.g. Yuriko, Tiger's Shadow)"
                   className="w-full bg-transparent border-none focus:ring-0 px-4 py-4 text-lg placeholder:text-white/20"
                 />
+                <button
+                  type="button"
+                  onClick={() => setIsCameraOpen(true)}
+                  className="p-3 text-white/40 hover:text-purple-400 transition-colors"
+                  title="Scan Card"
+                >
+                  <Camera size={24} />
+                </button>
                 <button
                   type="submit"
                   disabled={loading}
@@ -522,6 +532,15 @@ export default function App() {
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
+      />
+
+      <CameraScanner 
+        isOpen={isCameraOpen} 
+        onClose={() => setIsCameraOpen(false)} 
+        onDetected={(name) => {
+          setQuery(name);
+          handleSearch(name, 1);
+        }}
       />
 
       {/* Close history on click outside */}

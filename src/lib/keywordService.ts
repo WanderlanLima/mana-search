@@ -118,6 +118,26 @@ class KeywordService {
       return this.definitions[key].definition;
     }
 
+    // 🌟 If not found in local database, try to get a definition using Gemini
+    try {
+      console.log(`KeywordService: Definition for "${keyword}" not found locally. Requesting from Gemini...`);
+      const aiDefinition = await translateToPTBR(keyword, 'definition');
+      
+      if (aiDefinition && aiDefinition !== keyword) {
+        // Optionally save this to the local definitions for this session
+        const newKey = keyword.toLowerCase();
+        this.definitions[newKey] = {
+          name: keyword,
+          definition: aiDefinition,
+          lastUpdated: Date.now()
+        };
+        this.updateKeywordList();
+        return aiDefinition;
+      }
+    } catch (error) {
+      console.error("KeywordService: Error getting definition from Gemini", error);
+    }
+
     return `O robô NIGHTMARE ainda não catalogou a definição oficial para "${keyword}". Ele fará uma varredura automática para tentar encontrar o texto nos lembretes das cartas.`;
   }
 

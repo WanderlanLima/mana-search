@@ -90,13 +90,16 @@ export const translateMTG = async (text: string, type: 'keyword' | 'definition' 
   try {
     const ai = getAi();
     if (!ai) {
-      // Fallback to Google Translate if Gemini is not configured
+      console.log("🌐 Translation: Gemini not configured, falling back to Google Translate.");
       return await translateText(text, 'pt');
     }
     
+    console.log(`🤖 Translation: Requesting MTG ${type} translation from Gemini...`);
     const prompt = type === 'keyword' 
       ? `Translate this Magic: The Gathering keyword to Portuguese (PT-BR) using the official Wizards of the Coast glossary. Return ONLY the translated keyword. Keyword: "${text}"`
-      : `Translate this Magic: The Gathering ${type} to Portuguese (PT-BR) using the official Wizards of the Coast glossary and terminology. Ensure technical terms like "battlefield", "graveyard", "scry", etc., are translated correctly. Return ONLY the translated text. Text: "${text}"`;
+      : type === 'definition'
+        ? `Provide a concise definition in Portuguese (PT-BR) for the Magic: The Gathering keyword "${text}" using the official Wizards of the Coast glossary. Return ONLY the definition.`
+        : `Translate this Magic: The Gathering ${type} to Portuguese (PT-BR) using the official Wizards of the Coast glossary and terminology. Ensure technical terms like "battlefield", "graveyard", "scry", etc., are translated correctly. Return ONLY the translated text. Text: "${text}"`;
 
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
@@ -107,13 +110,62 @@ export const translateMTG = async (text: string, type: 'keyword' | 'definition' 
     });
 
     const result = response.text?.trim();
-    if (result) return result;
+    if (result) {
+      console.log(`✅ Translation: Gemini successfully translated ${type}.`);
+      return result;
+    }
     
-    // Fallback to Google Translate if Gemini fails
+    console.log("⚠️ Translation: Gemini returned empty result, falling back to Google Translate.");
     return await translateText(text, 'pt');
   } catch (error) {
-    console.error("Gemini translation error:", error);
+    console.error("❌ Gemini translation error:", error);
+    console.log("🌐 Translation: Falling back to Google Translate due to error.");
     return await translateText(text, 'pt');
+  }
+};
+
+// New: Identify card from image using Gemini Vision
+export const identifyCardFromImage = async (base64Image: string): Promise<string | null> => {
+  try {
+    const ai = getAi();
+    if (!ai) throw new Error("GEMINI_NOT_CONFIGURED");
+
+    const response = await ai.models.generateContent({
+      model: "gemini-3-flash-preview",
+      contents: [
+        {
+          inlineData: {
+            mimeType: "image/jpeg",
+            data: base64Image.split(',')[1] || base64Image // Handle both data URL and raw base64
+          }
+        },
+        {
+          text: "Identify the name of this Magic: The Gathering card. Return ONLY the card name in English. If you cannot identify it, return 'unknown'."
+        }
+      ],
+      config: {
+        temperature: 0.1,
+      }
+    });
+
+    const name = response.text?.trim();
+    if (name && name.toLowerCase() !== 'unknown') {
+      return name;
+    }
+    return null;
+  } catch (error: any) {
+    console.error("Gemini Vision error:", error);
+    
+    // Check for quota or API key errors
+    const errorMsg = error?.message?.toLowerCase() || "";
+    if (errorMsg.includes("quota") || errorMsg.includes("429") || errorMsg.includes("limit")) {
+      throw new Error("GEMINI_QUOTA_EXCEEDED");
+    }
+    if (errorMsg.includes("key") || errorMsg.includes("401") || errorMsg.includes("403")) {
+      throw new Error("GEMINI_AUTH_ERROR");
+    }
+    
+    return null;
   }
 };
 
