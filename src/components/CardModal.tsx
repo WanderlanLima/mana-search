@@ -207,25 +207,25 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 40 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="glass-surface w-full h-full md:h-auto md:max-w-6xl md:max-h-[90vh] overflow-y-auto md:overflow-hidden md:rounded-[32px] border-white/10 flex flex-col md:flex-row relative scroll-smooth"
+        className="w-full h-full md:h-auto md:max-w-6xl md:max-h-[90vh] overflow-y-auto md:overflow-hidden md:rounded-[32px] border border-white/10 flex flex-col md:flex-row relative scroll-smooth bg-black"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button (Floating) */}
         <button
           onClick={onClose}
-          className="fixed md:absolute top-4 right-4 z-50 p-2 bg-black/40 hover:bg-white/10 rounded-full backdrop-blur-md transition-all border border-white/5"
+          className="fixed md:absolute top-4 right-4 z-[100] p-2 bg-black/60 hover:bg-white/10 rounded-full backdrop-blur-md transition-all border border-white/10 shadow-xl"
         >
           <X size={20} />
         </button>
 
         {/* Card Image Section - Sticky on Mobile */}
-        <div className="w-full md:w-[42%] h-[60vh] md:h-full p-8 md:p-12 flex items-center justify-center bg-gradient-to-br from-purple-600/10 to-transparent border-b md:border-b-0 md:border-r border-white/5 shrink-0 sticky top-0 md:relative z-0">
+        <div className="w-full md:w-[42%] h-[50vh] md:h-full p-8 md:p-12 flex items-center justify-center bg-black md:bg-gradient-to-br md:from-purple-600/10 md:to-transparent border-b md:border-b-0 md:border-r border-white/5 shrink-0 sticky top-0 md:relative z-0">
           <motion.div 
             initial={{ rotateY: 20, rotateX: -10, opacity: 0, scale: 0.8 }}
             animate={{ rotateY: 0, rotateX: 0, opacity: 1, scale: 1 }}
             whileHover={{ rotateY: 0, rotateX: 0, scale: 1.05 }}
             transition={{ duration: 0.8, type: 'spring' }}
-            className="relative group w-full max-w-[280px] md:max-w-none perspective-1000"
+            className="relative group w-full max-w-[220px] md:max-w-none perspective-1000"
           >
             <div className="absolute -inset-4 bg-purple-500/20 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
             <img
@@ -238,10 +238,10 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
         </div>
 
         {/* Content Section - Slides over on Mobile */}
-        <div className="flex-1 flex flex-col min-h-0 md:overflow-y-auto relative z-10 bg-[#030303]/90 md:bg-transparent backdrop-blur-3xl md:backdrop-blur-0 rounded-t-[40px] md:rounded-none -mt-12 md:mt-0 border-t md:border-t-0 border-white/10 shadow-[0_-20px_40px_rgba(0,0,0,0.8)] md:shadow-none">
-          <div className="p-6 md:p-10 space-y-8 pb-32">
+        <div className="flex-1 w-full flex flex-col min-h-screen md:min-h-0 md:overflow-y-auto relative z-[60] bg-black md:bg-transparent rounded-t-[40px] md:rounded-none -mt-16 md:mt-0 border-t md:border-t-0 border-white/10 shadow-[0_-40px_80px_rgba(0,0,0,1)] md:shadow-none">
+          <div className="p-6 md:p-10 space-y-8 pb-32 bg-black md:bg-transparent rounded-t-[40px] md:rounded-none relative z-[70]">
             {/* Header Info */}
-            <div className="space-y-2">
+            <div className="space-y-2 relative z-[80]">
               <div className="flex items-center gap-2 text-purple-400 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
                 <Sparkles size={12} /> {card.set_name} • {card.rarity}
               </div>
@@ -254,7 +254,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
             </div>
 
             {/* Tabs Navigation */}
-            <div className="flex p-1 bg-white/10 rounded-2xl w-fit">
+            <div className="flex p-1 bg-white/10 rounded-2xl w-fit relative z-[80]">
               <button
                 onClick={() => setActiveTab('details')}
                 className={cn(
@@ -279,7 +279,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="space-y-8"
+                className="space-y-8 relative z-[80]"
               >
                 {/* Oracle Text */}
                 <div className="space-y-4">
@@ -297,7 +297,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                     )}
                   </div>
                   
-                  <div className="p-6 bg-white/[0.03] rounded-3xl border border-white/5 text-sm md:text-lg leading-relaxed whitespace-pre-wrap font-serif text-white/80">
+                  <div className="p-6 bg-white/[0.08] rounded-3xl border border-white/10 text-sm md:text-lg leading-relaxed whitespace-pre-wrap font-serif text-white/80 relative z-[80]">
                     {renderText(getOracleText())}
                   </div>
 
@@ -339,7 +339,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                   
                   if (uniqueKeywords.length > 0) {
                     return (
-                      <div className="space-y-4">
+                      <div className="space-y-4 relative z-[80]">
                         <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-black">Keywords Identified</h3>
                         <div className="flex flex-wrap gap-2">
                           {uniqueKeywords.map((kw, i) => (
@@ -360,7 +360,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
                 })()}
 
                 {/* Legalities */}
-                <div className="space-y-4">
+                <div className="space-y-4 relative z-[80]">
                   <h3 className="text-[10px] uppercase tracking-[0.3em] text-white/20 font-black">Format Legality</h3>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     {card.legalities ? mainFormats.map((format) => {
@@ -380,7 +380,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
               <motion.div 
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                className="space-y-6"
+                className="space-y-6 relative z-[80]"
               >
                 {loadingRules ? (
                   <div className="flex flex-col items-center justify-center py-20 text-white/20">
@@ -420,7 +420,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
           </div>
 
           {/* Action Footer */}
-          <div className="p-6 md:p-8 border-t border-white/5 bg-[#030303]/95 backdrop-blur-xl sticky bottom-0 z-30">
+          <div className="p-6 md:p-8 border-t border-white/5 bg-[#030303] md:backdrop-blur-xl sticky bottom-0 z-[80]">
             <a
               href={card.scryfall_uri}
               target="_blank"
