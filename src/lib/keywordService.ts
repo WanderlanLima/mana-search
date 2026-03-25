@@ -25,6 +25,7 @@ class KeywordService {
   }
 
   private loadFromStorage() {
+    if (typeof localStorage === 'undefined') return;
     const stored = localStorage.getItem('mtg_keyword_definitions');
     if (stored) {
       this.definitions = JSON.parse(stored);
@@ -54,6 +55,7 @@ class KeywordService {
   }
 
   private saveToStorage() {
+    if (typeof localStorage === 'undefined') return;
     localStorage.setItem('mtg_keyword_definitions', JSON.stringify(this.definitions));
   }
 

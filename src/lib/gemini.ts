@@ -7,13 +7,22 @@ const getAi = () => {
   if (!aiInstance) {
     // Check multiple possible locations for the API key, filtering out placeholders
     const possibleKeys = [
+      typeof process !== 'undefined' ? process.env?.GEMINI_API_KEY : undefined,
       (import.meta as any).env?.GEMINI_API_KEY,
-      (process.env as any)?.GEMINI_API_KEY,
-      (window as any).process?.env?.GEMINI_API_KEY,
-      (window as any).GEMINI_API_KEY
+      typeof window !== 'undefined' ? (window as any).process?.env?.GEMINI_API_KEY : undefined,
+      typeof window !== 'undefined' ? (window as any).GEMINI_API_KEY : undefined
     ];
     
-    const apiKey = possibleKeys.find(key => 
+    console.log("🔍 Gemini: Checking for API Key...");
+    possibleKeys.forEach((key, i) => {
+      if (key) {
+        console.log(`   - Source ${i}: Found (length: ${key.length}, starts with: ${key.substring(0, 3)}...)`);
+      } else {
+        console.log(`   - Source ${i}: Not found`);
+      }
+    });
+
+    let apiKey = possibleKeys.find(key => 
       key && 
       typeof key === 'string' && 
       key.trim() !== "" && 
@@ -22,8 +31,19 @@ const getAi = () => {
       !key.includes("TODO")
     ) || "";
     
+    // If we're on the server and still don't have a key, try to use the platform's default
+    if (!apiKey && typeof process !== 'undefined') {
+      const platformKey = process.env.API_KEY || "";
+      if (platformKey) {
+        console.log(`   - Platform API_KEY: Found (length: ${platformKey.length})`);
+        apiKey = platformKey;
+      }
+    }
+    
     if (!apiKey) {
-      console.warn("⚠️ Gemini API Key is missing or invalid. Check your AI Studio Secrets.");
+      console.error("❌ Gemini API Key is missing or invalid. Check your AI Studio Secrets.");
+      // Don't throw immediately, let the caller handle it or fallback to Google Translate
+      return null;
     }
       
     aiInstance = new GoogleGenAI({ apiKey });
@@ -57,6 +77,11 @@ export const translateMTG = async (text: string, type: 'keyword' | 'definition' 
 
   try {
     const ai = getAi();
+    if (!ai) {
+      // Fallback to Google Translate if Gemini is not configured
+      return await translateText(text, 'pt');
+    }
+    
     const prompt = type === 'keyword' 
       ? `Translate this Magic: The Gathering keyword to Portuguese (PT-BR) using the official Wizards of the Coast glossary. Return ONLY the translated keyword. Keyword: "${text}"`
       : `Translate this Magic: The Gathering ${type} to Portuguese (PT-BR) using the official Wizards of the Coast glossary and terminology. Ensure technical terms like "battlefield", "graveyard", "scry", etc., are translated correctly. Return ONLY the translated text. Text: "${text}"`;
