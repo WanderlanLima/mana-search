@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { db } from './db';
 
 export interface ScryfallCard {
   id: string;
@@ -96,6 +97,22 @@ const SCRYFALL_API = 'https://api.scryfall.com';
 
 export const scryfall = {
   search: async (query: string, page: number = 1) => {
+    // 1. Try local search first if synced
+    const syncStatus = await db.syncStatus.get('oracle_cards');
+    if (syncStatus && syncStatus.status === 'idle' && page === 1) {
+      // Simple search for now, can be improved with regex or more complex queries
+      const localResults = await db.allCards
+        .where('name')
+        .startsWithIgnoreCase(query)
+        .limit(20)
+        .toArray();
+      
+      if (localResults.length > 0) {
+        return { data: localResults, has_more: false, total_cards: localResults.length };
+      }
+    }
+
+    // 2. Fallback to API
     try {
       // Prioritize Portuguese and English, excluding other languages unless specifically requested
       // Wrap the original query in parentheses to ensure correct operator precedence
@@ -189,6 +206,45 @@ export const scryfall = {
     } catch (error: any) {
       console.error('Scryfall getCardById error:', error);
       throw new Error(error.response?.data?.details || error.message || 'Error fetching card by ID');
+    }
+  },
+
+  getCardByName: async (name: string): Promise<ScryfallCard | null> => {
+    // 1. Try local first
+    const syncStatus = await db.syncStatus.get('oracle_cards');
+    if (syncStatus && syncStatus.status === 'idle') {
+      const localCard = await db.allCards.where('name').equalsIgnoreCase(name).first();
+      if (localCard) return localCard;
+    }
+
+    // 2. Fallback to API
+    try {
+      const response = await axios.get(`${SCRYFALL_API}/cards/named`, {
+        params: { exact: name }
+      });
+      return response.data;
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        return null;
+      }
+      console.error('Scryfall getCardByName error:', error);
+      return null;
+    }
+  },
+
+  getCardsByNames: async (names: string[]): Promise<ScryfallCard[]> => {
+    if (names.length === 0) return [];
+    
+    try {
+      // Scryfall collection API allows up to 75 cards per request
+      const identifiers = names.map(name => ({ name }));
+      const response = await axios.post(`${SCRYFALL_API}/cards/collection`, {
+        identifiers
+      });
+      return response.data.data;
+    } catch (error: any) {
+      console.error('Scryfall getCardsByNames error:', error);
+      return [];
     }
   }
 };

@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Plus, Trash2, Calendar, Book, ChevronRight, LayoutGrid, Info, Copy } from 'lucide-react';
-import { db, MTGFormat, Deck } from '../lib/db';
+import { Plus, Trash2, Calendar, Book, ChevronRight, LayoutGrid, Info, Copy, RefreshCw, Database, CloudDownload, CheckCircle2, AlertTriangle, Loader2, X } from 'lucide-react';
+import { db, MTGFormat, Deck, SyncStatus } from '../lib/db';
 import { deckService } from '../lib/deckService';
+import { bulkDataService } from '../lib/bulkDataService';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { cn } from '../lib/utils';
 
@@ -16,8 +17,11 @@ interface DeckListProps {
 
 export const DeckList: React.FC<DeckListProps> = ({ onSelectDeck }) => {
   const [isCreating, setIsCreating] = useState(false);
+  const [showSync, setShowSync] = useState(false);
   const [newDeckName, setNewDeckName] = useState('');
   const [newDeckFormat, setNewDeckFormat] = useState<MTGFormat>('none');
+
+  const syncStatus = useLiveQuery(() => db.syncStatus.get('oracle_cards'));
 
   const decks = useLiveQuery(async () => {
     const allDecks = await db.decks.orderBy('updatedAt').reverse().toArray();
@@ -99,15 +103,37 @@ export const DeckList: React.FC<DeckListProps> = ({ onSelectDeck }) => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-display font-bold tracking-tight">Meus Decks</h2>
-          <p className="text-white/40 text-sm font-mono uppercase tracking-widest mt-1">Deck Vault & Offline Storage</p>
+          <div className="flex items-center gap-3 mt-1">
+            <p className="text-white/40 text-sm font-mono uppercase tracking-widest">Deck Vault & Offline Storage</p>
+            {syncStatus?.status === 'idle' && (
+              <span className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded-md text-[8px] font-black uppercase tracking-widest">
+                <Database size={10} /> {syncStatus.totalCards.toLocaleString()} Cartas Offline
+              </span>
+            )}
+          </div>
         </div>
-        <button
-          onClick={() => setIsCreating(true)}
-          className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all active:scale-95 shadow-lg shadow-white/5"
-        >
-          <Plus size={16} /> Novo Deck
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setShowSync(true)}
+            className="flex items-center gap-2 px-4 py-3 bg-white/5 text-white/60 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all active:scale-95 border border-white/10"
+          >
+            <RefreshCw size={16} className={cn(syncStatus?.status === 'syncing' && "animate-spin")} /> 
+            {syncStatus?.status === 'syncing' ? "Sincronizando..." : "Sincronizar"}
+          </button>
+          <button
+            onClick={() => setIsCreating(true)}
+            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all active:scale-95 shadow-lg shadow-white/5"
+          >
+            <Plus size={16} /> Novo Deck
+          </button>
+        </div>
       </div>
+
+      <AnimatePresence>
+        {showSync && (
+          <SyncModal onClose={() => setShowSync(false)} />
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {isCreating && (
@@ -246,5 +272,119 @@ export const DeckList: React.FC<DeckListProps> = ({ onSelectDeck }) => {
         )}
       </div>
     </div>
+  );
+};
+
+const SyncModal: React.FC<{ onClose: () => void }> = ({ onClose }) => {
+  const [progress, setProgress] = useState({ current: 0, total: 0 });
+  const syncStatus = useLiveQuery(() => db.syncStatus.get('oracle_cards'));
+
+  const handleSync = async () => {
+    try {
+      await bulkDataService.syncCards((current, total) => {
+        setProgress({ current, total });
+      });
+    } catch (error) {
+      console.error('Sync failed:', error);
+    }
+  };
+
+  const isSyncing = syncStatus?.status === 'syncing';
+  const percent = progress.total > 0 ? Math.round((progress.current / progress.total) * 100) : 0;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-[#0a0a0a] border border-white/10 rounded-[40px] w-full max-w-lg overflow-hidden shadow-2xl"
+      >
+        <div className="p-8 border-b border-white/5 flex items-center justify-between">
+          <div className="space-y-1">
+            <h3 className="text-2xl font-bold">Base de Dados Offline</h3>
+            <p className="text-xs text-white/40 font-medium uppercase tracking-widest">Sincronize todas as cartas do Scryfall</p>
+          </div>
+          <button onClick={onClose} disabled={isSyncing} className="p-2 hover:bg-white/5 rounded-full transition-colors disabled:opacity-20">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-8 space-y-8">
+          <div className="flex items-center gap-6">
+            <div className="w-16 h-16 bg-purple-600/10 rounded-2xl flex items-center justify-center text-purple-400">
+              <CloudDownload size={32} />
+            </div>
+            <div className="flex-1 space-y-1">
+              <h4 className="font-bold">Por que sincronizar?</h4>
+              <p className="text-xs text-white/40 leading-relaxed">
+                Ao baixar a base de dados, a busca de cartas e a criação de decks serão instantâneas e funcionarão sem internet.
+              </p>
+            </div>
+          </div>
+
+          {syncStatus?.lastSync ? (
+            <div className="p-4 bg-white/5 rounded-2xl border border-white/5 flex items-center justify-between">
+              <div className="space-y-1">
+                <span className="text-[8px] font-black uppercase tracking-widest text-white/20">Última Sincronização</span>
+                <p className="text-xs font-mono">{new Date(syncStatus.lastSync).toLocaleString()}</p>
+              </div>
+              <div className="text-right space-y-1">
+                <span className="text-[8px] font-black uppercase tracking-widest text-white/20">Total de Cartas</span>
+                <p className="text-xs font-mono">{syncStatus.totalCards.toLocaleString()}</p>
+              </div>
+            </div>
+          ) : (
+            <div className="p-4 bg-purple-500/5 rounded-2xl border border-purple-500/10 text-center">
+              <p className="text-xs text-purple-300/60 italic">Nenhuma sincronização realizada ainda.</p>
+            </div>
+          )}
+
+          {isSyncing ? (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest">
+                <span className="flex items-center gap-2 text-purple-400">
+                  <Loader2 size={12} className="animate-spin" /> Processando Cartas...
+                </span>
+                <span className="text-white/40">{percent}%</span>
+              </div>
+              <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${percent}%` }}
+                  className="h-full bg-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.4)]"
+                ></motion.div>
+              </div>
+              <p className="text-[10px] text-white/20 text-center font-mono">
+                {progress.current.toLocaleString()} / {progress.total.toLocaleString()}
+              </p>
+            </div>
+          ) : (
+            <button
+              onClick={handleSync}
+              className="w-full py-4 bg-white text-black rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all shadow-lg active:scale-[0.98]"
+            >
+              {syncStatus?.lastSync ? "Atualizar Base de Dados" : "Baixar Base de Dados (~30MB)"}
+            </button>
+          )}
+
+          {syncStatus?.status === 'error' && (
+            <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-2xl flex items-center gap-3 text-red-400">
+              <AlertTriangle size={16} />
+              <p className="text-[10px] font-bold uppercase tracking-tight">Erro: {syncStatus.error}</p>
+            </div>
+          )}
+        </div>
+
+        <div className="p-6 bg-white/[0.02] border-t border-white/5 text-center">
+          <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-bold">Dados fornecidos por Scryfall API</p>
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };

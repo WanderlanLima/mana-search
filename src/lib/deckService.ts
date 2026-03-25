@@ -1,5 +1,5 @@
 import { db, Deck, DeckCard, MTGFormat } from './db';
-import { ScryfallCard } from './scryfall';
+import { ScryfallCard, scryfall } from './scryfall';
 import { translateToPTBR } from './gemini';
 
 export class DeckService {
@@ -24,7 +24,9 @@ export class DeckService {
     deckId: number, 
     card: ScryfallCard, 
     quantity: number = 1, 
-    isSideboard: boolean = false
+    isSideboard: boolean = false,
+    skipTranslation: boolean = false,
+    skipDeckUpdate: boolean = false
   ) {
     // Check if card already exists in deck (same sideboard status)
     const existing = await db.deckCards
@@ -40,13 +42,15 @@ export class DeckService {
       let translatedName = card.printed_name || card.name;
       let translatedOracleText = card.printed_text || card.oracle_text;
 
-      try {
-        // We try to get translations now to save them for offline use
-        // If it fails, we just save the original English text
-        translatedName = await translateToPTBR(card.name, 'oracle');
-        translatedOracleText = await translateToPTBR(card.oracle_text || '', 'oracle');
-      } catch (e) {
-        console.warn("DeckService: Failed to pre-translate card for deck", e);
+      if (!skipTranslation) {
+        try {
+          // We try to get translations now to save them for offline use
+          // If it fails, we just save the original English text
+          translatedName = await translateToPTBR(card.name, 'oracle');
+          translatedOracleText = await translateToPTBR(card.oracle_text || '', 'oracle');
+        } catch (e) {
+          console.warn("DeckService: Failed to pre-translate card for deck", e);
+        }
       }
 
       await db.deckCards.add({
@@ -69,7 +73,9 @@ export class DeckService {
       });
     }
 
-    await db.decks.update(deckId, { updatedAt: Date.now() });
+    if (!skipDeckUpdate) {
+      await db.decks.update(deckId, { updatedAt: Date.now() });
+    }
   }
 
   async removeCardFromDeck(cardId: number) {
@@ -172,6 +178,19 @@ export class DeckService {
       });
     }
 
+    // Scryfall Legalities Check
+    if (deck.format !== 'none') {
+      cards.forEach(c => {
+        const legality = (c.cardData.legalities as any)[deck.format];
+        if (legality === 'not_legal' || legality === 'banned') {
+          errors.push(`"${c.name}" é banida ou não permitida no formato ${deck.format}.`);
+        }
+        if (legality === 'restricted' && nameCounts[c.name] > 1) {
+          errors.push(`"${c.name}" é restrita no formato ${deck.format} (máximo 1 cópia).`);
+        }
+      });
+    }
+
     return {
       isValid: errors.length === 0,
       errors: Array.from(new Set(errors)), // Deduplicate
@@ -240,6 +259,68 @@ export class DeckService {
     }
 
     return list;
+  }
+
+  async importDeckList(deckId: number, text: string): Promise<{ added: string[], notFound: string[] }> {
+    const lines = text.split('\n');
+    const added: string[] = [];
+    const notFound: string[] = [];
+    let isSideboard = false;
+
+    const parsedCards: Array<{ name: string, quantity: number, isSideboard: boolean }> = [];
+
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+
+      if (trimmed.toLowerCase() === 'sideboard') {
+        isSideboard = true;
+        continue;
+      }
+
+      const match = trimmed.match(/^(\d+)\s+(.+)$/) || [null, "1", trimmed];
+      const quantity = parseInt(match[1] as string, 10) || 1;
+      const cardName = (match[2] as string).trim();
+      
+      parsedCards.push({ name: cardName, quantity, isSideboard });
+    }
+
+    if (parsedCards.length === 0) return { added, notFound };
+
+    // Batch fetch from Scryfall (max 75 per request)
+    const BATCH_SIZE = 75;
+    for (let i = 0; i < parsedCards.length; i += BATCH_SIZE) {
+      const batch = parsedCards.slice(i, i + BATCH_SIZE);
+      const names = batch.map(p => p.name);
+      
+      try {
+        const scryfallCards = await scryfall.getCardsByNames(names);
+        
+        // Map scryfall results back to our parsed cards
+        for (const parsed of batch) {
+          const found = scryfallCards.find(sc => 
+            sc.name.toLowerCase() === parsed.name.toLowerCase() || 
+            (sc.printed_name && sc.printed_name.toLowerCase() === parsed.name.toLowerCase())
+          );
+
+          if (found) {
+            // We use addCardToDeck with skipTranslation and skipDeckUpdate for speed
+            await this.addCardToDeck(deckId, found, parsed.quantity, parsed.isSideboard, true, true);
+            added.push(`${parsed.quantity}x ${found.name}`);
+          } else {
+            notFound.push(parsed.name);
+          }
+        }
+      } catch (error) {
+        console.error('Batch import error:', error);
+        batch.forEach(p => notFound.push(p.name));
+      }
+    }
+
+    // Update deck once at the end
+    await db.decks.update(deckId, { updatedAt: Date.now() });
+
+    return { added, notFound };
   }
 }
 

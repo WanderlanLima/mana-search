@@ -35,15 +35,27 @@ export interface DeckCard {
   cardData: ScryfallCard; // Full card data for offline access
 }
 
+export interface SyncStatus {
+  id: string; // e.g. 'oracle_cards'
+  lastSync: number;
+  totalCards: number;
+  status: 'idle' | 'syncing' | 'error';
+  error?: string;
+}
+
 export class ManaSearchDB extends Dexie {
   decks!: Table<Deck>;
   deckCards!: Table<DeckCard>;
+  allCards!: Table<ScryfallCard>;
+  syncStatus!: Table<SyncStatus>;
 
   constructor() {
     super('ManaSearchDB');
-    this.version(4).stores({
+    this.version(5).stores({
       decks: '++id, name, format, createdAt, updatedAt',
-      deckCards: '++id, deckId, scryfallId, name, isSideboard, isCommander'
+      deckCards: '++id, deckId, scryfallId, name, isSideboard, isCommander',
+      allCards: 'id, name, oracle_id, *colors, *color_identity, type_line',
+      syncStatus: 'id'
     });
   }
 }

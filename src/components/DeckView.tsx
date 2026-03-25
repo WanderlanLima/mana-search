@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, Plus, Minus, Info, BarChart3, PieChart, LayoutGrid, Layers, AlertTriangle, CheckCircle2, Languages, ExternalLink, Copy, Check, Sparkles } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, Info, BarChart3, PieChart, LayoutGrid, Layers, AlertTriangle, CheckCircle2, Languages, ExternalLink, Copy, Check, Sparkles, FileUp, X, Loader2 } from 'lucide-react';
 import { db, DeckCard } from '../lib/db';
 import { deckService } from '../lib/deckService';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -16,6 +16,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
   const [activeTab, setActiveTab] = useState<'cards' | 'stats'>('cards');
   const [showValidation, setShowValidation] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showImport, setShowImport] = useState(false);
 
   const deck = useLiveQuery(() => db.decks.get(deckId));
   const cards = useLiveQuery(() => db.deckCards.where('deckId').equals(deckId).toArray());
@@ -123,6 +124,12 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
           >
             {copied ? <Check size={14} /> : <Copy size={14} />}
             {copied ? "Copiado!" : "Copiar Lista"}
+          </button>
+          <button
+            onClick={() => setShowImport(true)}
+            className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 text-white/40 hover:text-white hover:bg-white/5"
+          >
+            <FileUp size={14} /> Importar Lista
           </button>
           <div className="w-px h-4 bg-white/10 mx-1"></div>
           <button
@@ -353,7 +360,124 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
           </div>
         </div>
       )}
+
+      {/* Import Modal */}
+      <AnimatePresence>
+        {showImport && (
+          <ImportModal 
+            deckId={deckId} 
+            onClose={() => setShowImport(false)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
+  );
+};
+
+const ImportModal: React.FC<{ deckId: number; onClose: () => void }> = ({ deckId, onClose }) => {
+  const [text, setText] = useState('');
+  const [isImporting, setIsImporting] = useState(false);
+  const [result, setResult] = useState<{ added: string[], notFound: string[] } | null>(null);
+
+  const handleImport = async () => {
+    if (!text.trim()) return;
+    setIsImporting(true);
+    try {
+      const res = await deckService.importDeckList(deckId, text);
+      setResult(res);
+    } catch (error) {
+      console.error('Import error:', error);
+    } finally {
+      setIsImporting(false);
+    }
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.9, opacity: 0 }}
+        className="bg-[#0a0a0a] border border-white/10 rounded-[40px] w-full max-w-2xl overflow-hidden shadow-2xl"
+      >
+        <div className="p-8 border-b border-white/5 flex items-center justify-between">
+          <div className="space-y-1">
+            <h3 className="text-2xl font-bold">Importar Lista de Deck</h3>
+            <p className="text-xs text-white/40 font-medium uppercase tracking-widest">Cole sua lista abaixo (ex: 4 Lightning Bolt)</p>
+          </div>
+          <button onClick={onClose} className="p-2 hover:bg-white/5 rounded-full transition-colors">
+            <X size={24} />
+          </button>
+        </div>
+
+        <div className="p-8 space-y-6">
+          {!result ? (
+            <>
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="1 Sol Ring&#10;1 Arcane Signet&#10;Sideboard&#10;1 Lightning Bolt"
+                className="w-full h-64 bg-white/5 border border-white/10 rounded-2xl p-4 text-sm font-mono focus:outline-none focus:border-purple-500 transition-colors resize-none"
+              />
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleImport}
+                  disabled={isImporting || !text.trim()}
+                  className="px-8 py-3 bg-white text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-purple-400 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isImporting ? <Loader2 size={16} className="animate-spin" /> : <FileUp size={16} />}
+                  {isImporting ? "Importando..." : "Começar Importação"}
+                </button>
+              </div>
+            </>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-green-400 flex items-center gap-2">
+                    <CheckCircle2 size={14} /> Adicionadas ({result.added.length})
+                  </h4>
+                  <div className="bg-green-500/5 border border-green-500/10 rounded-2xl p-4 h-48 overflow-y-auto space-y-1">
+                    {result.added.map((name, i) => (
+                      <div key={i} className="text-[10px] text-green-200/60 font-mono">{name}</div>
+                    ))}
+                    {result.added.length === 0 && <div className="text-[10px] text-white/10 italic">Nenhuma carta adicionada</div>}
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <h4 className="text-[10px] font-black uppercase tracking-widest text-red-400 flex items-center gap-2">
+                    <AlertTriangle size={14} /> Não Encontradas ({result.notFound.length})
+                  </h4>
+                  <div className="bg-red-500/5 border border-red-500/10 rounded-2xl p-4 h-48 overflow-y-auto space-y-1">
+                    {result.notFound.map((name, i) => (
+                      <div key={i} className="text-[10px] text-red-200/60 font-mono">{name}</div>
+                    ))}
+                    {result.notFound.length === 0 && <div className="text-[10px] text-white/10 italic">Todas as cartas encontradas</div>}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={onClose}
+                className="w-full py-4 bg-white text-black rounded-xl text-xs font-black uppercase tracking-widest hover:bg-purple-400 hover:text-white transition-all"
+              >
+                Concluído
+              </button>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
   );
 };
 
