@@ -207,7 +207,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 40 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="glass-surface w-full h-full md:h-auto md:max-w-6xl md:max-h-[90vh] overflow-hidden md:rounded-[32px] border-white/10 flex flex-col md:flex-row relative"
+        className="glass-surface w-full h-full md:h-auto md:max-w-6xl md:max-h-[90vh] overflow-y-auto md:overflow-hidden md:rounded-[32px] border-white/10 flex flex-col md:flex-row relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button (Floating) */}
@@ -219,7 +219,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
         </button>
 
         {/* Card Image Section */}
-        <div className="w-full md:w-[42%] p-8 md:p-12 flex items-center justify-center bg-gradient-to-br from-purple-600/10 to-transparent border-b md:border-b-0 md:border-r border-white/5 shrink-0">
+        <div className="w-full md:w-[42%] p-6 md:p-12 flex items-center justify-center bg-gradient-to-br from-purple-600/10 to-transparent border-b md:border-b-0 md:border-r border-white/5 shrink-0">
           <motion.div 
             initial={{ rotateY: 20, rotateX: -10 }}
             whileHover={{ rotateY: 0, rotateX: 0 }}
@@ -237,8 +237,8 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto">
-          <div className="p-6 md:p-10 space-y-8 pb-32">
+        <div className="flex-1 flex flex-col min-h-0 md:overflow-y-auto">
+          <div className="p-5 md:p-10 space-y-8 pb-32">
             {/* Header Info */}
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-purple-400 font-mono text-[10px] uppercase tracking-[0.3em] font-bold">
@@ -419,7 +419,7 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
           </div>
 
           {/* Action Footer */}
-          <div className="p-8 border-t border-white/5 bg-black/40 backdrop-blur-xl sticky bottom-0 z-30">
+          <div className="p-6 md:p-8 border-t border-white/5 bg-black/40 backdrop-blur-xl sticky bottom-0 z-30">
             <a
               href={card.scryfall_uri}
               target="_blank"
