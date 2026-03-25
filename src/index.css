@@ -9,31 +9,31 @@
 
 @layer base {
   :root {
-    --background: 0 0% 2%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 4%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 4%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 262 83% 58%; /* A nice purple accent */
-    --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 10%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 10%;
-    --muted-foreground: 0 0% 50%;
-    --accent: 0 0% 10%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 10%;
-    --input: 0 0% 10%;
-    --ring: 262 83% 58%;
+    --background: 240 9% 6%; /* #0e0e11 */
+    --foreground: 280 15% 94%; /* #f0edf1 */
+    --card: 240 6% 10%; /* #19191d */
+    --card-foreground: 280 15% 94%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 280 15% 94%;
+    --primary: 273 100% 79%; /* #d095ff */
+    --primary-foreground: 274 100% 18%; /* #38005e */
+    --secondary: 271 100% 75%; /* #c280ff */
+    --secondary-foreground: 272 100% 18%; /* #33005a */
+    --muted: 240 6% 15%; /* #25252a */
+    --muted-foreground: 270 3% 67%; /* #acaaae */
+    --accent: 273 100% 79%; 
+    --accent-foreground: 274 100% 18%;
+    --destructive: 351 100% 71%; /* #ff6e84 */
+    --destructive-foreground: 343 100% 20%; /* #490013 */
+    --border: 240 6% 15%; /* #25252a */
+    --input: 240 6% 15%; /* #25252a */
+    --ring: 273 100% 79%; /* #d095ff */
   }
 }
 
 body {
-  background-color: #030303;
-  color: #f5f5f5;
+  background-color: #0e0e11;
+  color: #f0edf1;
   font-family: var(--font-sans);
   overflow-x: hidden;
 }
@@ -52,9 +52,10 @@ body {
 
 /* Glass Morphism */
 .glass-surface {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(37, 37, 42, 0.6); /* surface_variant */
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(118, 117, 121, 0.15); /* ghost outline */
 }
 
 /* Custom scrollbar for dark theme */
