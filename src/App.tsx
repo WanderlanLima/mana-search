@@ -1,37 +1,34 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, Suspense, lazy } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu, ArrowLeft, ArrowRight, HelpCircle, Settings, Camera, Ghost, Layout, Database } from 'lucide-react';
 import { scryfall, ScryfallCard } from './lib/scryfall';
 import { CardItem } from './components/CardItem';
-import { CardModal } from './components/CardModal';
-import { NightmareStatus } from './components/NightmareStatus';
-import { SettingsModal } from './components/SettingsModal';
-import { CameraScanner } from './components/CameraScanner';
 import { DeckList } from './components/DeckList';
 import { DeckView } from './components/DeckView';
 import { cn } from './lib/utils';
 import { keywordService } from './lib/keywordService';
+import { useStore } from './store/useStore';
+
+const CardModal = lazy(() => import('./components/CardModal').then(m => ({ default: m.CardModal })));
+const NightmareStatus = lazy(() => import('./components/NightmareStatus').then(m => ({ default: m.NightmareStatus })));
+const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
+const CameraScanner = lazy(() => import('./components/CameraScanner').then(m => ({ default: m.CameraScanner })));
+
 
 export default function App() {
-  const [query, setQuery] = useState('');
-  const [cards, setCards] = useState<ScryfallCard[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [selectedCard, setSelectedCard] = useState<ScryfallCard | null>(null);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(false);
+  const {
+    query, setQuery, cards, setCards, loading, setLoading, error, setError,
+    selectedCard, setSelectedCard, page, setPage, hasMore, setHasMore,
+    suggestions, setSuggestions, quickResults, setQuickResults,
+    loadingSuggestions, setLoadingSuggestions,
+    activeTab, setActiveTab, selectedDeckId, setSelectedDeckId,
+    isSettingsOpen, setIsSettingsOpen, isCameraOpen, setIsCameraOpen,
+    isNightmareOpen, setIsNightmareOpen, showKeywordsOnly, setShowKeywordsOnly
+  } = useStore();
+
   const [history, setHistory] = useState<string[]>([]);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [quickResults, setQuickResults] = useState<ScryfallCard[]>([]);
-  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [nightmareClicks, setNightmareClicks] = useState(0);
-  const [isNightmareOpen, setIsNightmareOpen] = useState(false);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isCameraOpen, setIsCameraOpen] = useState(false);
-  const [showKeywordsOnly, setShowKeywordsOnly] = useState(false);
-  const [activeTab, setActiveTab] = useState<'search' | 'decks'>('search');
-  const [selectedDeckId, setSelectedDeckId] = useState<number | null>(null);
   const [keywordSearch, setKeywordSearch] = useState('');
   const nightmareTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -615,35 +612,37 @@ export default function App() {
       </footer>
 
       {/* Modals */}
-      <AnimatePresence>
-        {selectedCard && (
-          <CardModal
-            key={selectedCard.id}
-            card={selectedCard}
-            onClose={() => setSelectedCard(null)}
-          />
-        )}
-      </AnimatePresence>
+      <Suspense fallback={null}>
+        <AnimatePresence>
+          {selectedCard && (
+            <CardModal
+              key={selectedCard.id}
+              card={selectedCard}
+              onClose={() => setSelectedCard(null)}
+            />
+          )}
+        </AnimatePresence>
 
-      <NightmareStatus 
-        isOpen={isNightmareOpen} 
-        onClose={() => setIsNightmareOpen(false)} 
-        onSearchKeywords={searchKeywordsOnly}
-      />
+        <NightmareStatus 
+          isOpen={isNightmareOpen} 
+          onClose={() => setIsNightmareOpen(false)} 
+          onSearchKeywords={searchKeywordsOnly}
+        />
 
-      <SettingsModal 
-        isOpen={isSettingsOpen} 
-        onClose={() => setIsSettingsOpen(false)} 
-      />
+        <SettingsModal 
+          isOpen={isSettingsOpen} 
+          onClose={() => setIsSettingsOpen(false)} 
+        />
 
-      <CameraScanner 
-        isOpen={isCameraOpen} 
-        onClose={() => setIsCameraOpen(false)} 
-        onDetected={(name) => {
-          setQuery(name);
-          handleSearch(name, 1);
-        }}
-      />
+        <CameraScanner 
+          isOpen={isCameraOpen} 
+          onClose={() => setIsCameraOpen(false)} 
+          onDetected={(name) => {
+            setQuery(name);
+            handleSearch(name, 1);
+          }}
+        />
+      </Suspense>
 
       {/* Close history on click outside */}
       {showDropdown && (

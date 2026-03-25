@@ -4,6 +4,7 @@ import { X, Camera, Loader2, Sparkles, Scan, AlertCircle } from 'lucide-react';
 import { identifyCardFromImage } from '../lib/gemini';
 import { storage } from '../lib/storage';
 import { cn } from '../lib/utils';
+import { scryfall } from '../lib/scryfall';
 import Tesseract from 'tesseract.js';
 
 interface CameraScannerProps {
@@ -64,8 +65,22 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
     try {
       const { data: { text } } = await Tesseract.recognize(image, 'eng');
       // Clean the text: take the first line and remove non-alphanumeric chars at start/end
-      const firstLine = text.split('\n')[0].trim();
-      if (firstLine.length > 3) return firstLine;
+      const firstLine = text.split('\n')[0].trim().replace(/[^a-zA-Z0-9 ',-]/g, '');
+      if (firstLine.length > 3) {
+        try {
+          const names = await scryfall.getAutocomplete(firstLine);
+          if (names.length > 0) return names[0];
+          
+          const fuzzyRes = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(firstLine)}`);
+          if (fuzzyRes.ok) {
+            const cardData = await fuzzyRes.json();
+            return cardData.name;
+          }
+        } catch(e) {
+          console.warn("Fuzzy search fallback failed");
+        }
+        return firstLine;
+      }
       return null;
     } catch (err) {
       console.error("Local OCR error:", err);
@@ -86,20 +101,25 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
       
       if (!context) return;
 
-      // Define the crop area (the scanner rectangle)
+      // Define the crop area precisely for the title bar
       const scanWidth = video.videoWidth * 0.8;
-      const scanHeight = video.videoHeight * 0.3;
+      // The title bar is roughly 8% of the height
+      const scanHeight = video.videoHeight * 0.08;
       const scanX = (video.videoWidth - scanWidth) / 2;
-      const scanY = video.videoHeight * 0.1;
+      const scanY = video.videoHeight * 0.1; // Top 10% where the overlay starts
 
       canvas.width = scanWidth;
       canvas.height = scanHeight;
       
+      // Apply filters for better OCR readability
+      context.filter = 'grayscale(100%) contrast(150%) brightness(120%)';
       context.drawImage(
         video, 
         scanX, scanY, scanWidth, scanHeight,
         0, 0, scanWidth, scanHeight
       );
+      // Reset filter
+      context.filter = 'none';
 
       const base64Image = canvas.toDataURL('image/jpeg', 0.8);
       

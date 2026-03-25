@@ -43,19 +43,29 @@ export interface SyncStatus {
   error?: string;
 }
 
+export interface Translation {
+  id: string;
+  originalText: string;
+  translatedText: string;
+  type: string;
+  createdAt: number;
+}
+
 export class ManaSearchDB extends Dexie {
   decks!: Table<Deck>;
   deckCards!: Table<DeckCard>;
   allCards!: Table<ScryfallCard>;
   syncStatus!: Table<SyncStatus>;
+  translations!: Table<Translation>;
 
   constructor() {
     super('ManaSearchDB');
-    this.version(5).stores({
+    this.version(6).stores({
       decks: '++id, name, format, createdAt, updatedAt',
       deckCards: '++id, deckId, scryfallId, name, isSideboard, isCommander',
       allCards: 'id, name, oracle_id, *colors, *color_identity, type_line',
-      syncStatus: 'id'
+      syncStatus: 'id',
+      translations: 'id, type'
     });
   }
 }
