@@ -121,22 +121,78 @@ class KeywordService {
     return `O robô NIGHTMARE ainda não catalogou a definição oficial para "${keyword}". Ele fará uma varredura automática para tentar encontrar o texto nos lembretes das cartas.`;
   }
 
+  getKeywordKey(text: string): string | undefined {
+    return this.nameToKey[text.toLowerCase()];
+  }
+
   // Helper to find keywords in a text block
   findKeywordsInText(text: string): string[] {
     if (!text) return [];
-    const found: string[] = [];
     
+    const matches: { keyword: string, start: number, end: number }[] = [];
+    
+    // 1. Find all possible matches for all keywords
     for (const keyword of this.keywords) {
-      // Escape keyword for regex and use word boundaries
-      const escapedKw = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      // Escape keyword for regex and replace spaces with \s+ for flexibility
+      const escapedKw = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
       const regex = new RegExp(`\\b${escapedKw}\\b`, 'gi');
       
-      if (regex.test(text)) {
-        found.push(keyword);
+      let match;
+      // Reset regex index for safety (though it's a new instance)
+      regex.lastIndex = 0;
+      
+      while ((match = regex.exec(text)) !== null) {
+        matches.push({
+          keyword,
+          start: match.index,
+          end: match.index + match[0].length
+        });
+        
+        // Prevent infinite loop if match is empty
+        if (match.index === regex.lastIndex) {
+          regex.lastIndex++;
+        }
       }
     }
     
-    return found;
+    // 2. Sort matches by length (descending) to prioritize longer phrases
+    // Then by start position to maintain order
+    matches.sort((a, b) => {
+      const lenA = a.end - a.start;
+      const lenB = b.end - b.start;
+      if (lenB !== lenA) return lenB - lenA;
+      return a.start - b.start;
+    });
+    
+    // 3. Filter out matches that are contained within or overlap with longer matches
+    const finalKeywords: string[] = [];
+    const coveredPositions = new Set<number>();
+    
+    for (const match of matches) {
+      let isOverlapping = false;
+      for (let i = match.start; i < match.end; i++) {
+        if (coveredPositions.has(i)) {
+          isOverlapping = true;
+          break;
+        }
+      }
+      
+      if (!isOverlapping) {
+        finalKeywords.push(match.keyword);
+        // Mark these positions as covered
+        for (let i = match.start; i < match.end; i++) {
+          coveredPositions.add(i);
+        }
+      }
+    }
+    
+    // 4. Return keywords in the order they appear in the text
+    // We can re-sort them by their original start position
+    return finalKeywords.sort((a, b) => {
+      const startA = matches.find(m => m.keyword === a)?.start || 0;
+      const startB = matches.find(m => m.keyword === b)?.start || 0;
+      return startA - startB;
+    });
   }
 }
 

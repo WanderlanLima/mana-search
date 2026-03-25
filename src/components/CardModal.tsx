@@ -309,12 +309,25 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
 
                   {/* Keywords Section */}
                   {(() => {
-                    const foundKeywords = [
+                    const foundStrings = [
                       ...getKeywordsInText(getOracleText()),
                       ...(translatedText ? getKeywordsInText(translatedText) : [])
                     ];
-                    // Remove duplicates
-                    const uniqueKeywords = Array.from(new Set(foundKeywords));
+                    
+                    // Map found strings to their canonical keys and preferred display names
+                    const keywordMap = new Map<string, string>();
+                    const allDefs = keywordService.getAllDefinitions();
+                    
+                    foundStrings.forEach(str => {
+                      const key = keywordService.getKeywordKey(str);
+                      if (key && allDefs[key]) {
+                        const def = allDefs[key];
+                        // Prefer translated name for display, fallback to original name
+                        keywordMap.set(key, def.translatedName || def.name);
+                      }
+                    });
+                    
+                    const uniqueKeywords = Array.from(keywordMap.values());
                     
                     if (uniqueKeywords.length > 0) {
                       return (

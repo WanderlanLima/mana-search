@@ -77,6 +77,1518 @@
       "translatedName": "Destreza",
       "definition": "Toda vez que você conjura uma mágica que não seja de criatura, esta criatura recebe +1/+1 até o final do turno.",
       "lastUpdated": 1711247687000
+    },
+    "living weapon": {
+      "name": "Living weapon",
+      "translatedName": "Arma viva",
+      "definition": "Quando este Equipamento entrar, crie uma ficha de criatura preta 0/0 do tipo Germe Phyrexiano e anexe-a a ele.",
+      "lastUpdated": 1774397178142
+    },
+    "jump-start": {
+      "name": "Jump-start",
+      "translatedName": "Início rápido",
+      "definition": "Você pode conjurar este card de seu cemitério descartando um card além de pagar seus outros custos. Então exile esta carta.",
+      "lastUpdated": 1774397180625
+    },
+    "commander ninjutsu": {
+      "name": "Commander Ninjutsu",
+      "translatedName": "Comandante Ninjutsu",
+      "definition": "{U}{B}, Devolva para a mão um atacante desbloqueado que você controla: Coloque este card da sua mão ou da zona de comando no campo de batalha virado e atacando.",
+      "lastUpdated": 1774397181939
+    },
+    "legendary landwalk": {
+      "name": "Legendary landwalk",
+      "translatedName": "Passeio lendário",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar um terreno lendário.",
+      "lastUpdated": 1774397183268
+    },
+    "nonbasic landwalk": {
+      "name": "Nonbasic landwalk",
+      "translatedName": "Passeio terrestre não básico",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar um terreno não básico.",
+      "lastUpdated": 1774397184641
+    },
+    "megamorph": {
+      "name": "Megamorph",
+      "translatedName": "Megamorfo",
+      "definition": "Você pode conjurar este card virado para baixo como uma criatura 2/2 por {3}. Vire-o para cima a qualquer momento pagando seu custo de megamorfose e coloque um marcador +1/+1 nele.",
+      "lastUpdated": 1774397187138
+    },
+    "haunt": {
+      "name": "Haunt",
+      "translatedName": "Assombrar",
+      "definition": "Quando esta criatura morrer, exile-a assombrando a criatura alvo.",
+      "lastUpdated": 1774397188745
+    },
+    "forecast": {
+      "name": "Forecast",
+      "translatedName": "Previsão",
+      "definition": "Ative apenas durante sua manutenção e apenas uma vez em cada turno.",
+      "lastUpdated": 1774397190217
+    },
+    "graft": {
+      "name": "Graft",
+      "translatedName": "Enxerto",
+      "definition": "Esta criatura entra com dois marcadores +1/+1. Toda vez que outra criatura entra, você pode mover um marcador +1/+1 desta criatura para ela.",
+      "lastUpdated": 1774397191601
+    },
+    "fortify": {
+      "name": "Fortify",
+      "translatedName": "Fortalecer",
+      "definition": "{3}: Anexe ao terreno alvo que você controla. Fortificar apenas como um feitiço.",
+      "lastUpdated": 1774397192957
+    },
+    "frenzy": {
+      "name": "Frenzy",
+      "translatedName": "Frenesi",
+      "definition": "Toda vez que esta criatura atacar e não for bloqueada, ela receberá +2/+0 até o final do turno.",
+      "lastUpdated": 1774397194330
+    },
+    "gravestorm": {
+      "name": "Gravestorm",
+      "translatedName": "Tempestade",
+      "definition": "Quando você conjurar esta mágica, copie-a para cada permanente colocada em um cemitério neste turno. Você pode escolher novos alvos para as cópias.",
+      "lastUpdated": 1774397195644
+    },
+    "hideaway": {
+      "name": "Hideaway",
+      "translatedName": "Refúgio",
+      "definition": "Quando esse encantamento entrar, olhe os cinco cards do topo do seu grimório, exile um com a face para baixo e coloque o restante no fundo em ordem aleatória.",
+      "lastUpdated": 1774397197158
+    },
+    "level up": {
+      "name": "Level Up",
+      "translatedName": "Subir de nível",
+      "definition": "{2}{G}: Coloque um marcador de nível nisso. Suba de nível apenas como feitiço.",
+      "lastUpdated": 1774397199020
+    },
+    "infect": {
+      "name": "Infect",
+      "translatedName": "Infectar",
+      "definition": "Esta criatura causa dano a criaturas na forma de marcadores -1/-1 e a jogadores na forma de marcadores de veneno.",
+      "lastUpdated": 1774397201270
+    },
+    "rampage": {
+      "name": "Rampage",
+      "translatedName": "Fúria",
+      "definition": "Sempre que esta criatura for bloqueada, ela receberá +3/+3 até o final do turno para cada criatura que a bloquear além da primeira.",
+      "lastUpdated": 1774397202898
+    },
+    "phasing": {
+      "name": "Phasing",
+      "translatedName": "Fases",
+      "definition": "Isso entra ou sai gradualmente antes de você desvirar durante cada uma de suas etapas de desvirar. Embora seja eliminado, é tratado como se não existisse.",
+      "lastUpdated": 1774397204154
+    },
+    "multikicker": {
+      "name": "Multikicker",
+      "translatedName": "Multikicker",
+      "definition": "Você pode pagar {1}{W} adicionais quantas vezes quiser ao conjurar esta mágica.",
+      "lastUpdated": 1774397205570
+    },
+    "morph": {
+      "name": "Morph",
+      "translatedName": "Morfar",
+      "definition": "Você pode conjurar este card virado para baixo como uma criatura 2/2 por {3}. Vire-o para cima a qualquer momento pelo seu custo de metamorfose.",
+      "lastUpdated": 1774397211537
+    },
+    "provoke": {
+      "name": "Provoke",
+      "translatedName": "Provocar",
+      "definition": "Sempre que esta criatura atacar, você pode fazer com que a criatura alvo que o jogador defensor controla desvire e bloqueie-a, se possível.",
+      "lastUpdated": 1774397212844
+    },
+    "modular": {
+      "name": "Modular",
+      "translatedName": "Modular",
+      "definition": "Esta criatura entra com três marcadores +1/+1. Quando ela morrer, você pode colocar seus marcadores +1/+1 na criatura artefato alvo.",
+      "lastUpdated": 1774397214295
+    },
+    "ninjutsu": {
+      "name": "Ninjutsu",
+      "translatedName": "Ninjutsu",
+      "definition": "{1}{B}, Devolva para a mão um atacante desbloqueado que você controla: Coloque este card de sua mão virado e atacando no campo de batalha.",
+      "lastUpdated": 1774397216174
+    },
+    "replicate": {
+      "name": "Replicate",
+      "translatedName": "Replicar",
+      "definition": "Ao conjurar esta mágica, copie-a cada vez que você pagou seu custo de replicação. Você pode escolher novos alvos para as cópias.",
+      "lastUpdated": 1774397217735
+    },
+    "recover": {
+      "name": "Recover",
+      "translatedName": "Recuperar",
+      "definition": "Quando uma criatura é colocada em seu cemitério vinda do campo de batalha, você pode pagar {2}{U}{U}. Se fizer isso, devolva este card de seu cemitério para sua mão. Caso contrário, exile esta carta.",
+      "lastUpdated": 1774397219046
+    },
+    "poisonous": {
+      "name": "Poisonous",
+      "translatedName": "Venenoso",
+      "definition": "Sempre que causa dano de combate a um jogador, esse jogador recebe três marcadores de veneno. Um jogador com dez ou mais marcadores de veneno perde o jogo.",
+      "lastUpdated": 1774397220745
+    },
+    "reinforce": {
+      "name": "Reinforce",
+      "translatedName": "Reforçar",
+      "definition": "{1}{G}, Descarte este card: Coloque dois marcadores +1/+1 na criatura alvo.",
+      "lastUpdated": 1774397222567
+    },
+    "persist": {
+      "name": "Persist",
+      "translatedName": "Persistir",
+      "definition": "Quando esta criatura morrer, se ela não tiver nenhum marcador -1/-1, devolva-a ao campo de batalha sob o controle de seu dono com um marcador -1/-1.",
+      "lastUpdated": 1774397223887
+    },
+    "retrace": {
+      "name": "Retrace",
+      "translatedName": "Refaça",
+      "definition": "Você pode conjurar este card de seu cemitério descartando um card de terreno além de pagar seus outros custos.",
+      "lastUpdated": 1774397225357
+    },
+    "rebound": {
+      "name": "Rebound",
+      "translatedName": "Recuperação",
+      "definition": "Se você conjurar esta mágica de sua mão, exile-a conforme ela for resolvida. No início de sua próxima manutenção, você poderá conjurar este card do exílio sem pagar seu custo de mana.",
+      "lastUpdated": 1774397227894
+    },
+    "miracle": {
+      "name": "Miracle",
+      "translatedName": "Milagre",
+      "definition": "Você pode conjurar esta carta pagando seu custo de milagre ao comprá-la, se ela for a primeira carta que você comprou neste turno.",
+      "lastUpdated": 1774397229431
+    },
+    "overload": {
+      "name": "Overload",
+      "translatedName": "Sobrecarga",
+      "definition": "Você pode conjurar esta mágica pagando seu custo de sobrecarga. Se fizer isso, altere “target” no texto para “each”.",
+      "lastUpdated": 1774397230917
+    },
+    "outlast": {
+      "name": "Outlast",
+      "translatedName": "Durar mais",
+      "definition": "{W}, {T}: Coloque um marcador +1/+1 nesta criatura. Durar apenas como um feitiço.",
+      "lastUpdated": 1774397232301
+    },
+    "renown": {
+      "name": "Renown",
+      "translatedName": "Renome",
+      "definition": "Quando esta criatura causar dano de combate a um jogador, se ela não for renomada, coloque um marcador +1/+1 nela e ela se tornará renomada.",
+      "lastUpdated": 1774397233820
+    },
+    "myriad": {
+      "name": "Myriad",
+      "translatedName": "Miríade",
+      "definition": "Toda vez que esta criatura atacar, para cada oponente que não seja o jogador defensor, você pode criar uma ficha de cópia que é virada e ataca aquele jogador ou um planeswalker que ela controla. Exile as fichas no final do combate.",
+      "lastUpdated": 1774397236202
+    },
+    "shroud": {
+      "name": "Shroud",
+      "translatedName": "Mortalha",
+      "definition": "Esta criatura não pode ser alvo de mágicas ou habilidades.",
+      "lastUpdated": 1774397237871
+    },
+    "storm": {
+      "name": "Storm",
+      "translatedName": "Tempestade",
+      "definition": "Quando você conjurar esta mágica, copie-a para cada magia conjurada antes dela neste turno. As cópias tornam-se tokens.",
+      "lastUpdated": 1774397239518
+    },
+    "soulshift": {
+      "name": "Soulshift",
+      "translatedName": "Mudança de alma",
+      "definition": "Quando esta criatura morrer, você pode devolver o card de Espírito alvo com valor de mana igual ou inferior a 8 de seu cemitério para sua mão.",
+      "lastUpdated": 1774397240906
+    },
+    "splice": {
+      "name": "Splice",
+      "translatedName": "Emenda",
+      "definition": "Ao conjurar uma mágica Arcana, você pode revelar este card de sua mão e pagar seu custo de união. Se fizer isso, adicione os efeitos deste card àquela mágica.",
+      "lastUpdated": 1774397242357
+    },
+    "transmute": {
+      "name": "Transmute",
+      "translatedName": "Transmutar",
+      "definition": "{1}{B}{B}, Descarte este card: Procure em seu grimório um card com o mesmo valor de mana deste card, revele-o, coloque-o em sua mão e depois embaralhe. Transmute apenas como um feitiço.",
+      "lastUpdated": 1774397243853
+    },
+    "ripple": {
+      "name": "Ripple",
+      "translatedName": "Ondulação",
+      "definition": "Ao conjurar esta mágica, você pode revelar os quatro cards do topo do seu grimório. Você pode conjurar mágicas com o mesmo nome desta mágica dentre essas cartas sem pagar seus custos de mana. Coloque o resto no fundo da sua biblioteca.",
+      "lastUpdated": 1774397245212
+    },
+    "suspend": {
+      "name": "Suspend",
+      "translatedName": "Suspender",
+      "definition": "Em vez de conjurar este card da sua mão, pague {U} e exile-o com quatro marcadores temporais. No início de sua manutenção, remova um contador de tempo. Quando o último for removido, você poderá conjurá-lo sem pagar seu custo de mana.",
+      "lastUpdated": 1774397248819
+    },
+    "vanishing": {
+      "name": "Vanishing",
+      "translatedName": "Desaparecimento",
+      "definition": "Esta criatura entra com três marcadores temporais. No início de sua manutenção, remova um contador de tempo dele. Quando o último for removido, sacrifique-o.",
+      "lastUpdated": 1774397250379
+    },
+    "transfigure": {
+      "name": "Transfigure",
+      "translatedName": "Transfigurar",
+      "definition": "{1}{B}{B}, Sacrifique esta criatura: Procure em seu grimório um card de criatura com o mesmo valor de mana que esta criatura, coloque aquele card no campo de batalha e depois embaralhe. Transfigurar apenas como feitiçaria.",
+      "lastUpdated": 1774397252154
+    },
+    "wither": {
+      "name": "Wither",
+      "translatedName": "Murchar",
+      "definition": "Isso causa dano às criaturas na forma de contadores -1/-1.",
+      "lastUpdated": 1774397253711
+    },
+    "undying": {
+      "name": "Undying",
+      "translatedName": "Imortal",
+      "definition": "Quando esta criatura morrer, se ela não tiver nenhum marcador +1/+1, devolva-a ao campo de batalha sob o controle de seu dono com um marcador +1/+1.",
+      "lastUpdated": 1774397255180
+    },
+    "soulbond": {
+      "name": "Soulbond",
+      "translatedName": "Vínculo Espiritual",
+      "definition": "Você pode emparelhar esta criatura com outra criatura não emparelhada quando qualquer uma delas entrar. Eles permanecem emparelhados enquanto você controlar os dois.",
+      "lastUpdated": 1774397256595
+    },
+    "unleash": {
+      "name": "Unleash",
+      "translatedName": "Liberte",
+      "definition": "Você pode fazer com que esta criatura entre com um marcador +1/+1. Ele não pode bloquear enquanto tiver um marcador +1/+1.",
+      "lastUpdated": 1774397258085
+    },
+    "ascend": {
+      "name": "Ascend",
+      "translatedName": "Subir",
+      "definition": "Se você controlar dez ou mais permanentes, receberá a bênção da cidade pelo resto do jogo.",
+      "lastUpdated": 1774397260142
+    },
+    "assist": {
+      "name": "Assist",
+      "translatedName": "Ajuda",
+      "definition": "Outro jogador pode pagar até {5} do custo desta mágica.",
+      "lastUpdated": 1774397261437
+    },
+    "afterlife": {
+      "name": "Afterlife",
+      "translatedName": "Vida após a morte",
+      "definition": "Quando esta criatura morrer, crie duas fichas de criatura branca e preta 1/1 do tipo Espírito com voar.",
+      "lastUpdated": 1774397263203
+    },
+    "companion": {
+      "name": "Companion",
+      "translatedName": "Companheiro",
+      "definition": "Se esta carta for o seu companheiro escolhido, você pode colocá-la em sua mão fora do jogo por {3} como um feitiço.",
+      "lastUpdated": 1774397264574
+    },
+    "fabricate": {
+      "name": "Fabricate",
+      "translatedName": "Fabricar",
+      "definition": "Quando esta criatura entrar, coloque um marcador +1/+1 nela ou crie uma ficha de criatura artefato incolor 1/1 do tipo Servo.",
+      "lastUpdated": 1774397266645
+    },
+    "embalm": {
+      "name": "Embalm",
+      "translatedName": "Embalsamar",
+      "definition": "{5}{W}, Exile este card de seu cemitério: Crie uma ficha que seja uma cópia dele, exceto que é um Anjo Zumbi branco sem custo de mana. Embalsamar apenas como feitiçaria.",
+      "lastUpdated": 1774397268800
+    },
+    "escape": {
+      "name": "Escape",
+      "translatedName": "Escapar",
+      "definition": "Você pode conjurar este card de seu cemitério pagando seu custo de fuga.",
+      "lastUpdated": 1774397270455
+    },
+    "fuse": {
+      "name": "Fuse",
+      "translatedName": "Fusível",
+      "definition": "Você pode conjurar uma ou ambas as metades desta carta da sua mão.",
+      "lastUpdated": 1774397271844
+    },
+    "ingest": {
+      "name": "Ingest",
+      "translatedName": "Ingerir",
+      "definition": "Toda vez que esta criatura causar dano de combate a um jogador, aquele jogador exila o card do topo de seu grimório.",
+      "lastUpdated": 1774397273198
+    },
+    "melee": {
+      "name": "Melee",
+      "translatedName": "Corpo a corpo",
+      "definition": "Toda vez que esta criatura ataca, ela recebe +1/+1 até o final do turno para cada oponente que você atacou neste combate.",
+      "lastUpdated": 1774397274627
+    },
+    "improvise": {
+      "name": "Improvise",
+      "translatedName": "Improvisar",
+      "definition": "Seus artefatos podem ajudar a lançar esse feitiço. Cada artefato que você vira depois de ativar as habilidades de mana paga {1}.",
+      "lastUpdated": 1774397276274
+    },
+    "mentor": {
+      "name": "Mentor",
+      "translatedName": "Mentor",
+      "definition": "Toda vez que esta criatura atacar, coloque um marcador +1/+1 na criatura atacante alvo com menor poder.",
+      "lastUpdated": 1774397278209
+    },
+    "partner": {
+      "name": "Partner",
+      "translatedName": "Parceiro",
+      "definition": "Você pode ter dois comandantes se ambos tiverem essa habilidade.",
+      "lastUpdated": 1774397282443
+    },
+    "mutate": {
+      "name": "Mutate",
+      "translatedName": "Mutar",
+      "definition": "Se você conjurar esta mágica pagando seu custo de mutação, coloque-a acima ou abaixo da criatura alvo que você possui que não seja um Humano. Eles se transformam na criatura de cima e em todas as habilidades de baixo dela.",
+      "lastUpdated": 1774397284256
+    },
+    "tribute": {
+      "name": "Tribute",
+      "translatedName": "Tributo",
+      "definition": "Conforme esta criatura entra, um oponente à sua escolha pode colocar um marcador +1/+1 nela.",
+      "lastUpdated": 1774397285601
+    },
+    "surge": {
+      "name": "Surge",
+      "translatedName": "Surto",
+      "definition": "Você pode conjurar esta mágica pagando seu custo adicional se você ou um colega de equipe tiver conjurado outra mágica neste turno.",
+      "lastUpdated": 1774397287001
+    },
+    "skulk": {
+      "name": "Skulk",
+      "translatedName": "Esquivar",
+      "definition": "Esta criatura não pode ser bloqueada por criaturas com maior poder.",
+      "lastUpdated": 1774397288562
+    },
+    "riot": {
+      "name": "Riot",
+      "translatedName": "Rebelião",
+      "definition": "Esta criatura entra com um marcador +1/+1 adicional ou ímpeto, à sua escolha.",
+      "lastUpdated": 1774397290056
+    },
+    "spectacle": {
+      "name": "Spectacle",
+      "translatedName": "Espetáculo",
+      "definition": "Você pode conjurar esta mágica por seu custo de espetáculo em vez de seu custo de mana se um oponente perder pontos de vida neste turno.",
+      "lastUpdated": 1774397293958
+    },
+    "forestwalk": {
+      "name": "Forestwalk",
+      "translatedName": "Caminhada na floresta",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar uma Floresta.",
+      "lastUpdated": 1774397295436
+    },
+    "islandwalk": {
+      "name": "Islandwalk",
+      "translatedName": "Passeio pela ilha",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar uma Ilha.",
+      "lastUpdated": 1774397296860
+    },
+    "mountainwalk": {
+      "name": "Mountainwalk",
+      "translatedName": "Caminhada na montanha",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar uma Montanha.",
+      "lastUpdated": 1774397298574
+    },
+    "double strike": {
+      "name": "Double strike",
+      "translatedName": "Golpe duplo",
+      "definition": "{3}{W}{W}, Exile este card de seu cemitério: Crie uma ficha que seja uma cópia dele, exceto que é um Gato Zumbi preto 4/4 sem custo de mana. Eternize apenas como feitiçaria.",
+      "lastUpdated": 1774397301186
+    },
+    "cumulative upkeep": {
+      "name": "Cumulative upkeep",
+      "translatedName": "Manutenção cumulativa",
+      "definition": "No início de sua manutenção, coloque um marcador de idade nesta permanente e depois sacrifique-a, a menos que você pague seu custo de manutenção para cada marcador de idade nela.",
+      "lastUpdated": 1774397302997
+    },
+    "first strike": {
+      "name": "First strike",
+      "translatedName": "Primeiro ataque",
+      "definition": "dois contadores de energia",
+      "lastUpdated": 1774397310923
+    },
+    "scavenge": {
+      "name": "Scavenge",
+      "translatedName": "Limpar",
+      "definition": "{5}{G}{G}, Exile este card de seu cemitério: Coloque um número de marcadores +1/+1 igual ao poder deste card na criatura alvo. Limpe apenas como um feitiço.",
+      "lastUpdated": 1774397312319
+    },
+    "encore": {
+      "name": "Encore",
+      "translatedName": "Bis",
+      "definition": "{4}{U}{U}, Exile este card de seu cemitério: Para cada oponente, crie uma cópia de ficha que ataque aquele oponente neste turno, se estiver disponível. Eles ganham pressa. Sacrifique-os no início da próxima etapa final. Ative apenas como um feitiço.",
+      "lastUpdated": 1774397317463
+    },
+    "defender": {
+      "name": "Defender",
+      "translatedName": "Defensor",
+      "definition": "Esta criatura pode bloquear criaturas com voar.",
+      "lastUpdated": 1774397321222
+    },
+    "amplify": {
+      "name": "Amplify",
+      "translatedName": "Amplificar",
+      "definition": "Quando esta criatura entrar, coloque nela um marcador +1/+1 para cada carta de Pássaro e/ou Soldado que você revelar em sua mão.",
+      "lastUpdated": 1774397322665
+    },
+    "affinity": {
+      "name": "Affinity",
+      "translatedName": "Afinidade",
+      "definition": "Este feitiço custa {1} a menos para ser lançado para cada Aliado que você controla.",
+      "lastUpdated": 1774397326469
+    },
+    "bushido": {
+      "name": "Bushido",
+      "translatedName": "Bushido",
+      "definition": "Toda vez que esta criatura bloqueia ou é bloqueada, ela recebe +1/+1 até o final do turno.",
+      "lastUpdated": 1774397327955
+    },
+    "convoke": {
+      "name": "Convoke",
+      "translatedName": "Convocar",
+      "definition": "Suas criaturas podem ajudar a lançar este feitiço. Cada criatura que você vira ao lançar esta mágica paga {1} ou um mana da cor daquela criatura.",
+      "lastUpdated": 1774397329910
+    },
+    "bloodthirst": {
+      "name": "Bloodthirst",
+      "translatedName": "Sede de sangue",
+      "definition": "Se um oponente sofreu dano neste turno, esta criatura entra com um marcador +1/+1.",
+      "lastUpdated": 1774397331375
+    },
+    "absorb": {
+      "name": "Absorb",
+      "translatedName": "Absorver",
+      "definition": "Se uma fonte fosse causar dano a um Fractius, previna 1 desse dano.",
+      "lastUpdated": 1774397333183
+    },
+    "aura swap": {
+      "name": "Aura Swap",
+      "translatedName": "Troca de Aura",
+      "definition": "{2}{U}: Troque esta Aura por um card de Aura em sua mão.",
+      "lastUpdated": 1774397334624
+    },
+    "changeling": {
+      "name": "Changeling",
+      "translatedName": "Mutano",
+      "definition": "Este card é de todos os tipos de criatura.",
+      "lastUpdated": 1774397336342
+    },
+    "conspire": {
+      "name": "Conspire",
+      "translatedName": "Conspirar",
+      "definition": "Ao conjurar esta mágica, você pode virar duas criaturas desviradas que você controla e que compartilhem uma cor com ela. Ao fazer isso, copie-o e você poderá escolher um novo alvo para a cópia.",
+      "lastUpdated": 1774397337754
+    },
+    "cascade": {
+      "name": "Cascade",
+      "translatedName": "Cascata",
+      "definition": "Ao conjurar esta mágica, exile cards do topo de seu grimório até exilar um card que não seja um terreno e que custe menos. Você pode conjurá-lo sem pagar seu custo de mana. Coloque as cartas exiladas no fundo em ordem aleatória.",
+      "lastUpdated": 1774397339459
+    },
+    "annihilator": {
+      "name": "Annihilator",
+      "translatedName": "Aniquilador",
+      "definition": "Toda vez que esta criatura ataca, o jogador defensor sacrifica duas permanentes à sua escolha.",
+      "lastUpdated": 1774397340901
+    },
+    "battle cry": {
+      "name": "Battle Cry",
+      "translatedName": "Grito de guerra",
+      "definition": "Toda vez que esta criatura ataca, cada outra criatura atacante recebe +1/+0 até o final do turno.",
+      "lastUpdated": 1774397342537
+    },
+    "cipher": {
+      "name": "Cipher",
+      "translatedName": "Cifra",
+      "definition": "Então você pode exilar este card de mágica codificado em uma criatura que você controla. Sempre que aquela criatura causar dano de combate a um jogador, seu controlador poderá conjurar uma cópia do card codificado sem pagar seu custo de mana.",
+      "lastUpdated": 1774397344112
+    },
+    "bestow": {
+      "name": "Bestow",
+      "translatedName": "Doar",
+      "definition": "Se você conjurar esta carta pelo seu custo de agraciar, ela será uma mágica de Aura com encantar criatura. Ela se torna uma criatura novamente se não estiver anexada.",
+      "lastUpdated": 1774397345737
+    },
+    "dash": {
+      "name": "Dash",
+      "translatedName": "Traço",
+      "definition": "Você pode conjurar esta mágica pagando seu custo de investida. Se fizer isso, ele ganha ímpeto e retorna do campo de batalha para a mão de seu dono no início da próxima etapa final.",
+      "lastUpdated": 1774397350019
+    },
+    "awaken": {
+      "name": "Awaken",
+      "translatedName": "Despertar",
+      "definition": "Se você conjurar esta mágica por {6}{R}, coloque também quatro marcadores +1/+1 no terreno alvo que você controla e ele se tornará uma criatura 0/0 Elemental com ímpeto. Ainda é uma terra.",
+      "lastUpdated": 1774397352078
+    },
+    "crew": {
+      "name": "Crew",
+      "translatedName": "Equipe",
+      "definition": "Vire qualquer número de criaturas que você controla com poder total igual ou superior a 3: Este Veículo se torna uma criatura artefato até o final do turno.",
+      "lastUpdated": 1774397354720
+    },
+    "aftermath": {
+      "name": "Aftermath",
+      "translatedName": "Consequências",
+      "definition": "Conjure esta mágica apenas do seu cemitério. Então exile-o.",
+      "lastUpdated": 1774397356263
+    },
+    "afflict": {
+      "name": "Afflict",
+      "translatedName": "Afligir",
+      "definition": "Sempre que esta criatura for bloqueada, o jogador defensor perde 3 pontos de vida.",
+      "lastUpdated": 1774397357600
+    },
+    "flanking": {
+      "name": "Flanking",
+      "translatedName": "Flanqueamento",
+      "definition": "Sempre que uma criatura sem flanquear bloqueia esta criatura, a criatura bloqueadora recebe -1/-1 até o final do turno.",
+      "lastUpdated": 1774397359034
+    },
+    "foretell": {
+      "name": "Foretell",
+      "translatedName": "Predizer",
+      "definition": "Durante o seu turno, você pode pagar {2} e exilar esta carta da sua mão com a face voltada para baixo. Lance-o em um turno posterior pagando seu custo de previsão.",
+      "lastUpdated": 1774397361791
+    },
+    "fading": {
+      "name": "Fading",
+      "translatedName": "Desvanecimento",
+      "definition": "Esta criatura entra com cinco marcadores de desvanecimento. No início de sua manutenção, remova um contador de desbotamento dele. Se não puder, sacrifique-o.",
+      "lastUpdated": 1774397364980
+    },
+    "eternalize": {
+      "name": "Eternalize",
+      "translatedName": "Eternizar",
+      "definition": "{3}{W}{W}, Exile este card de seu cemitério: Crie uma ficha que seja uma cópia dele, exceto que é um Gato Zumbi preto 4/4 sem custo de mana. Eternize apenas como feitiçaria.",
+      "lastUpdated": 1774397366820
+    },
+    "entwine": {
+      "name": "Entwine",
+      "translatedName": "Entrelaçar",
+      "definition": "Escolha ambos se você pagar o custo do entrelaçamento.",
+      "lastUpdated": 1774397368372
+    },
+    "epic": {
+      "name": "Epic",
+      "translatedName": "Épico",
+      "definition": "Durante o resto do jogo, você não poderá lançar feitiços. No início de cada uma de suas manutenções, copie esta mágica, exceto sua habilidade épica.",
+      "lastUpdated": 1774397369867
+    },
+    "dredge": {
+      "name": "Dredge",
+      "translatedName": "Draga",
+      "definition": "Se você comprar uma carta, poderá moer duas cartas. Se fizer isso, devolva este card de seu cemitério para sua mão.",
+      "lastUpdated": 1774397371271
+    },
+    "delve": {
+      "name": "Delve",
+      "translatedName": "Aprofundar",
+      "definition": "Cada card que você exila de seu cemitério ao conjurar esta mágica paga {1}.",
+      "lastUpdated": 1774397374294
+    },
+    "evoke": {
+      "name": "Evoke",
+      "translatedName": "Evocar",
+      "definition": "Você pode conjurar esta mágica pagando seu custo de evocar. Se você fizer isso, ele será sacrificado quando entrar.",
+      "lastUpdated": 1774397376032
+    },
+    "exalted": {
+      "name": "Exalted",
+      "translatedName": "Exaltado",
+      "definition": "Toda vez que uma criatura que você controla ataca sozinha, aquela criatura recebe +1/+1 até o final do turno.",
+      "lastUpdated": 1774397377612
+    },
+    "evolve": {
+      "name": "Evolve",
+      "translatedName": "Evoluir",
+      "definition": "Toda vez que uma criatura que você controla entrar, se aquela criatura tiver maior poder ou resistência que esta criatura, coloque um marcador +1/+1 nesta criatura.",
+      "lastUpdated": 1774397379368
+    },
+    "extort": {
+      "name": "Extort",
+      "translatedName": "Extorquir",
+      "definition": "Sempre que você lançar uma mágica, você poderá pagar {W/B}. Se fizer isso, cada oponente perde 1 ponto de vida e você ganha essa mesma quantidade de pontos de vida.",
+      "lastUpdated": 1774397380817
+    },
+    "dethrone": {
+      "name": "Dethrone",
+      "translatedName": "Destronar",
+      "definition": "Toda vez que esta criatura atacar o jogador com mais pontos de vida ou empatado com mais pontos de vida, coloque um marcador +1/+1 nela.",
+      "lastUpdated": 1774397382106
+    },
+    "exploit": {
+      "name": "Exploit",
+      "translatedName": "Explorar",
+      "definition": "Quando esta criatura entra, você pode sacrificar uma criatura.",
+      "lastUpdated": 1774397384141
+    },
+    "devoid": {
+      "name": "Devoid",
+      "translatedName": "Desprovido",
+      "definition": "Este cartão não tem cor.",
+      "lastUpdated": 1774397386403
+    },
+    "emerge": {
+      "name": "Emerge",
+      "translatedName": "Emergir",
+      "definition": "Você pode conjurar esta mágica sacrificando uma criatura e pagando o custo de emergência reduzido pelo valor de mana daquela criatura.",
+      "lastUpdated": 1774397387768
+    },
+    "escalate": {
+      "name": "Escalate",
+      "translatedName": "Escalar",
+      "definition": "Pague esse custo para cada modo escolhido além do primeiro.",
+      "lastUpdated": 1774397389146
+    },
+    "intimidate": {
+      "name": "Intimidate",
+      "translatedName": "Intimidar",
+      "definition": "Esta criatura não pode ser bloqueada exceto por criaturas artefato e/ou criaturas que compartilhem uma cor com ela.",
+      "lastUpdated": 1774397390807
+    },
+    "horsemanship": {
+      "name": "Horsemanship",
+      "translatedName": "Equitação",
+      "definition": "Esta criatura não pode ser bloqueada exceto por criaturas com habilidade de equitação.",
+      "lastUpdated": 1774397392359
+    },
+    "kicker": {
+      "name": "Kicker",
+      "translatedName": "Chutador",
+      "definition": "Você pode pagar {2} adicionais ao conjurar esta mágica.",
+      "lastUpdated": 1774397395327
+    },
+    "madness": {
+      "name": "Madness",
+      "translatedName": "Loucura",
+      "definition": "Se você descartar esta carta, descarte-a no exílio. Quando fizer isso, conjure-o pagando seu custo de loucura ou coloque-o em seu cemitério.",
+      "lastUpdated": 1774397396834
+    },
+    "swampwalk": {
+      "name": "Swampwalk",
+      "translatedName": "Caminhada no pântano",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar um Pântano.",
+      "lastUpdated": 1774397398691
+    },
+    "desertwalk": {
+      "name": "Desertwalk",
+      "translatedName": "Caminhada no Deserto",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar um Deserto.",
+      "lastUpdated": 1774397400154
+    },
+    "craft": {
+      "name": "Craft",
+      "translatedName": "Arte",
+      "definition": "{5}{W}{W}, Exile este artefato, Exile outro artefato que você controla ou um card de artefato de seu cemitério: Devolva este card transformado sob o controle de seu dono. Crie apenas como feitiçaria.",
+      "lastUpdated": 1774397402046
+    },
+    "plainswalk": {
+      "name": "Plainswalk",
+      "translatedName": "Calçada da planície",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar uma Planície.",
+      "lastUpdated": 1774397403465
+    },
+    "split second": {
+      "name": "Split second",
+      "translatedName": "Fração de segundo",
+      "definition": "Enquanto esta mágica estiver na pilha, os jogadores não poderão conjurar mágicas ou ativar habilidades que não sejam habilidades de mana.",
+      "lastUpdated": 1774397404970
+    },
+    "augment": {
+      "name": "Augment",
+      "translatedName": "Aumentar",
+      "definition": "{1}{B}, Revele este card de sua mão: Combine-o com o hospedeiro alvo. Aumente apenas como um feitiço.",
+      "lastUpdated": 1774397406375
+    },
+    "double agenda": {
+      "name": "Double agenda",
+      "translatedName": "Agenda dupla",
+      "definition": "Comece o jogo com esta conspiração virada para baixo na zona de comando e escolha secretamente dois nomes de cartas diferentes. Você pode revelar essa conspiração a qualquer momento e revelar esses nomes.",
+      "lastUpdated": 1774397407685
+    },
+    "reconfigure": {
+      "name": "Reconfigure",
+      "translatedName": "Reconfigurar",
+      "definition": "{2}: Anexe à criatura alvo que você controla; ou desvincular-se de uma criatura. Reconfigure apenas como um feitiço. Enquanto anexado, esta não é uma criatura.",
+      "lastUpdated": 1774397409115
+    },
+    "partner with": {
+      "name": "Partner with",
+      "translatedName": "Faça parceria com",
+      "definition": "Quando esta criatura entra, o jogador alvo pode colocar Alphinaud Leveilleur do seu grimório em sua mão e depois embaralhar.",
+      "lastUpdated": 1774397413691
+    },
+    "daybound": {
+      "name": "Daybound",
+      "translatedName": "Dia diurno",
+      "definition": "Se um jogador não conjurar mágicas durante seu próprio turno, será noite no próximo turno.",
+      "lastUpdated": 1774397416299
+    },
+    "nightbound": {
+      "name": "Nightbound",
+      "translatedName": "Nocturno",
+      "definition": "Se um jogador conjurar pelo menos duas mágicas durante seu próprio turno, o turno será o dia seguinte.",
+      "lastUpdated": 1774397418955
+    },
+    "decayed": {
+      "name": "Decayed",
+      "translatedName": "Decaído",
+      "definition": "Esta criatura não pode bloquear. Quando ele atacar, sacrifique-o no final do combate.",
+      "lastUpdated": 1774397420250
+    },
+    "disturb": {
+      "name": "Disturb",
+      "translatedName": "Perturbar",
+      "definition": "Você pode conjurar este card de seu cemitério transformado pagando seu custo de perturbação.",
+      "lastUpdated": 1774397422176
+    },
+    "squad": {
+      "name": "Squad",
+      "translatedName": "Esquadrão",
+      "definition": "Como custo adicional para conjurar esta mágica, você pode pagar {2} quantas vezes quiser. Quando esta criatura entrar, crie aquela quantidade de fichas que sejam cópias dela.",
+      "lastUpdated": 1774397426981
+    },
+    "enlist": {
+      "name": "Enlist",
+      "translatedName": "Alistar-se",
+      "definition": "Conforme esta criatura ataca, você pode virar uma criatura não atacante que você controla sem invocar doença. Quando fizer isso, adicione o poder dela ao desta criatura até o final do turno.",
+      "lastUpdated": 1774397428383
+    },
+    "read ahead": {
+      "name": "Read Ahead",
+      "translatedName": "Leia adiante",
+      "definition": "Escolha um capítulo e comece com tantos contadores de conhecimento. Adicione um após a etapa de sorteio. Capítulos ignorados não são acionados. Sacrifício após III.",
+      "lastUpdated": 1774397430220
+    },
+    "ravenous": {
+      "name": "Ravenous",
+      "translatedName": "Voraz",
+      "definition": "Esta criatura entra com X marcadores +1/+1. Se X for 5 ou mais, compre uma carta quando ela entrar.",
+      "lastUpdated": 1774397431629
+    },
+    "blitz": {
+      "name": "Blitz",
+      "translatedName": "Blitz",
+      "definition": "Se você conjurar esta mágica pagando seu custo de blitz, ela ganha ímpeto e \"Quando esta criatura morrer, compre um card.\" Sacrifique-o no início da próxima etapa final.",
+      "lastUpdated": 1774397436172
+    },
+    "offering": {
+      "name": "Offering",
+      "translatedName": "Oferta",
+      "definition": "Você pode conjurar esta mágica como se ela tivesse clarão sacrificando um artefato e pagando a diferença nos custos de mana entre este e o artefato sacrificado. O custo de mana inclui cor.",
+      "lastUpdated": 1774397437604
+    },
+    "living metal": {
+      "name": "Living metal",
+      "translatedName": "Metal vivo",
+      "definition": "Durante o seu turno, este Veículo também é uma criatura.",
+      "lastUpdated": 1774397438956
+    },
+    "backup": {
+      "name": "Backup",
+      "translatedName": "Backup",
+      "definition": "Quando esta criatura entrar, coloque um marcador +1/+1 na criatura alvo. Se for outra criatura, ela ganha as seguintes habilidades até o final do turno.",
+      "lastUpdated": 1774397440447
+    },
+    "banding": {
+      "name": "Banding",
+      "translatedName": "Bandas",
+      "definition": "Qualquer criatura com bandos, e até uma sem, pode atacar em bando. As bandas são bloqueadas como um grupo. Se alguma criatura com bando que você controla estiver bloqueando ou sendo bloqueada por uma criatura, você divide o dano de combate daquela criatura, e não de seu controlador, entre qualquer uma das criaturas pelas quais ela está sendo bloqueada ou bloqueando.",
+      "lastUpdated": 1774397442038
+    },
+    "hidden agenda": {
+      "name": "Hidden agenda",
+      "translatedName": "Agenda oculta",
+      "definition": "Comece o jogo com esta conspiração virada para baixo na zona de comando e escolha secretamente o nome de uma carta. Você pode revelar essa conspiração a qualquer momento e revelar esse nome.",
+      "lastUpdated": 1774397446243
+    },
+    "for mirrodin!": {
+      "name": "For Mirrodin!",
+      "translatedName": "Para Mirrodin!",
+      "definition": "Quando este Equipamento entrar, crie uma ficha de criatura Rebelde vermelha 2/2 e anexe-a a ela.",
+      "lastUpdated": 1774397448216
+    },
+    "friends forever": {
+      "name": "Friends forever",
+      "translatedName": "Amigos para sempre",
+      "definition": "Você pode ter dois comandantes se ambos tiverem essa habilidade.",
+      "lastUpdated": 1774397450402
+    },
+    "casualty": {
+      "name": "Casualty",
+      "translatedName": "Vítima",
+      "definition": "Ao conjurar esta mágica, você pode sacrificar uma criatura com poder igual ou superior a 1. Quando fizer isso, copie este feitiço.",
+      "lastUpdated": 1774397451960
+    },
+    "protection": {
+      "name": "Protection",
+      "translatedName": "Proteção",
+      "definition": "Você pode conjurar este card virado para baixo como uma criatura 2/2 por {3}. Vire-o para cima a qualquer momento pelo seu custo de metamorfose.",
+      "lastUpdated": 1774397454551
+    },
+    "compleated": {
+      "name": "Compleated",
+      "translatedName": "Concluído",
+      "definition": "{G/W/P} pode ser pago com {G}, {W} ou 2 pontos de vida. Se a vida foi paga, este planeswalker entra com dois marcadores de lealdade a menos.",
+      "lastUpdated": 1774397456140
+    },
+    "enchant": {
+      "name": "Enchant",
+      "translatedName": "Encantar",
+      "definition": "Não pode ser alvo de mágicas ou habilidades.",
+      "lastUpdated": 1774397459793
+    },
+    "flash": {
+      "name": "Flash",
+      "translatedName": "Clarão",
+      "definition": "Ao pagar um custo de dobra de água, você pode virar seus artefatos e criaturas para ajudar. Cada um paga por {1}.",
+      "lastUpdated": 1774397463141
+    },
+    "boast": {
+      "name": "Boast",
+      "translatedName": "Vangloriar-se",
+      "definition": "Ative somente se esta criatura atacou neste turno e apenas uma vez por turno.",
+      "lastUpdated": 1774397464913
+    },
+    "demonstrate": {
+      "name": "Demonstrate",
+      "translatedName": "Demonstrar",
+      "definition": "Ao lançar esta magia, você pode copiá-la. Se fizer isso, escolha um oponente para também copiá-lo.",
+      "lastUpdated": 1774397466392
+    },
+    "sunburst": {
+      "name": "Sunburst",
+      "translatedName": "Raio de Sol",
+      "definition": "Esta criatura entra com um marcador +1/+1 para cada cor de mana gasta para conjurá-la. Quando ela morrer, você pode colocar seus marcadores +1/+1 na criatura artefato alvo.",
+      "lastUpdated": 1774397467770
+    },
+    "flashback": {
+      "name": "Flashback",
+      "translatedName": "Flashback",
+      "definition": "Você pode conjurar este card de seu cemitério pagando seu custo de flashback. Então exile-o.",
+      "lastUpdated": 1774397470629
+    },
+    "cycling": {
+      "name": "Cycling",
+      "translatedName": "Ciclismo",
+      "definition": "{1}{B}, Descarte este card: Procure um card de terreno básico em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397472969
+    },
+    "equip": {
+      "name": "Equip",
+      "translatedName": "Equipar",
+      "definition": "{3}: Anexe à criatura alvo que você controla. Equipe apenas como um feitiço.",
+      "lastUpdated": 1774397476670
+    },
+    "buyback": {
+      "name": "Buyback",
+      "translatedName": "Recompra",
+      "definition": "Você pode pagar {3} adicionais ao conjurar esta mágica. Se fizer isso, coloque este card em sua mão conforme ele for resolvido.",
+      "lastUpdated": 1774397478443
+    },
+    "hexproof from": {
+      "name": "Hexproof from",
+      "translatedName": "À prova de magia de",
+      "definition": "Toda vez que esta criatura ataca, o jogador defensor sacrifica duas permanentes à sua escolha.",
+      "lastUpdated": 1774397479989
+    },
+    "more than meets the eye": {
+      "name": "More Than Meets the Eye",
+      "translatedName": "Mais do que aparenta",
+      "definition": "Você pode conjurar este card convertido por {R}{W}.",
+      "lastUpdated": 1774397481423
+    },
+    "cleave": {
+      "name": "Cleave",
+      "translatedName": "Dividir",
+      "definition": "Você pode conjurar esta mágica pagando seu custo de clivagem. Se fizer isso, remova as palavras entre colchetes.",
+      "lastUpdated": 1774397482912
+    },
+    "champion": {
+      "name": "Champion",
+      "translatedName": "Campeão",
+      "definition": "Quando isso entrar, sacrifique-o, a menos que você exile outro Goblin que você controla. Quando este card sai do campo de batalha, aquele card retorna ao campo de batalha.",
+      "lastUpdated": 1774397484352
+    },
+    "training": {
+      "name": "Training",
+      "translatedName": "Treinamento",
+      "definition": "Toda vez que esta criatura atacar com outra criatura com poder maior, coloque um marcador +1/+1 nesta criatura.",
+      "lastUpdated": 1774397494560
+    },
+    "prototype": {
+      "name": "Prototype",
+      "translatedName": "Protótipo",
+      "definition": "Você pode lançar este feitiço com diferentes custos de mana, cores e tamanhos. Ele mantém suas habilidades e tipos.",
+      "lastUpdated": 1774397496556
+    },
+    "toxic": {
+      "name": "Toxic",
+      "translatedName": "Tóxico",
+      "definition": "Os jogadores que sofreram dano de combate por esta criatura também recebem um marcador de veneno.",
+      "lastUpdated": 1774397499455
+    },
+    "unearth": {
+      "name": "Unearth",
+      "translatedName": "Desenterrar",
+      "definition": "{5}{B}{R}: Devolva este card de seu cemitério para o campo de batalha. Ganha pressa. Exile-o no início da próxima etapa final ou se ele for deixar o campo de batalha. Desenterrar apenas como feitiçaria.",
+      "lastUpdated": 1774397501314
+    },
+    "plainscycling": {
+      "name": "Plainscycling",
+      "translatedName": "Ciclismo em planície",
+      "definition": "{2}, descarte este card: Procure um card de Planície em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397505746
+    },
+    "swampcycling": {
+      "name": "Swampcycling",
+      "translatedName": "Ciclismo no pântano",
+      "definition": "{2}, descarte este card: Procure um card de Pântano em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397507106
+    },
+    "wizardcycling": {
+      "name": "Wizardcycling",
+      "translatedName": "Ciclismo mágico",
+      "definition": "{2}, Descarte este card: Procure um card de Mago em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397513559
+    },
+    "mountaincycling": {
+      "name": "Mountaincycling",
+      "translatedName": "Ciclismo de montanha",
+      "definition": "{2}, descarte este card: Procure um card de Montanha em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397514906
+    },
+    "basic landcycling": {
+      "name": "Basic landcycling",
+      "translatedName": "Ciclismo básico",
+      "definition": "{1}{B}, Descarte este card: Procure um card de terreno básico em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397516382
+    },
+    "islandcycling": {
+      "name": "Islandcycling",
+      "translatedName": "Ciclismo na ilha",
+      "definition": "{2}, descarte este card: Procure um card de Ilha em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397517703
+    },
+    "forestcycling": {
+      "name": "Forestcycling",
+      "translatedName": "Ciclismo florestal",
+      "definition": "{2}, descarte este card: Procure um card de Floresta em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397519151
+    },
+    "slivercycling": {
+      "name": "Slivercycling",
+      "translatedName": "Slivercycling",
+      "definition": "{3}, descarte este card: Procure um card Fractius em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397520991
+    },
+    "landcycling": {
+      "name": "Landcycling",
+      "translatedName": "Ciclismo terrestre",
+      "definition": "{1}{B}, Descarte este card: Procure um card de terreno básico em seu grimório, revele-o, coloque-o em sua mão e depois embaralhe.",
+      "lastUpdated": 1774397522695
+    },
+    "bargain": {
+      "name": "Bargain",
+      "translatedName": "Negociar",
+      "definition": "Você pode sacrificar um artefato, encantamento ou ficha ao conjurar esta mágica.",
+      "lastUpdated": 1774397524189
+    },
+    "choose a background": {
+      "name": "Choose a background",
+      "translatedName": "Escolha um plano de fundo",
+      "definition": "Você pode ter um antecedente como segundo comandante.",
+      "lastUpdated": 1774397527068
+    },
+    "echo": {
+      "name": "Echo",
+      "translatedName": "Eco",
+      "definition": "No início de sua manutenção, se ele estiver sob seu controle desde o início de sua última manutenção, sacrifique-o, a menos que você pague seu custo de eco.",
+      "lastUpdated": 1774397528638
+    },
+    "disguise": {
+      "name": "Disguise",
+      "translatedName": "Disfarce",
+      "definition": "Você pode conjurar este card virado para baixo por {3} como uma criatura 2/2 com proteção {2}. Vire-o para cima a qualquer momento pagando seu custo de disfarce.",
+      "lastUpdated": 1774397532452
+    },
+    "doctor's companion": {
+      "name": "Doctor's companion",
+      "translatedName": "Companheiro do médico",
+      "definition": "Você pode ter dois comandantes se o outro for o Doutor.",
+      "lastUpdated": 1774397534027
+    },
+    "landwalk": {
+      "name": "Landwalk",
+      "translatedName": "Passeio terrestre",
+      "definition": "Esta criatura não pode ser bloqueada enquanto o jogador defensor controlar uma Ilha.",
+      "lastUpdated": 1774397535985
+    },
+    "umbra armor": {
+      "name": "Umbra armor",
+      "translatedName": "Armadura Umbra",
+      "definition": "Se a criatura encantada for destruída, em vez disso, remova todo o dano dela e destrua esta Aura.",
+      "lastUpdated": 1774397537494
+    },
+    "freerunning": {
+      "name": "Freerunning",
+      "translatedName": "Corrida livre",
+      "definition": "Você pode conjurar esta mágica pagando seu custo de corrida livre se tiver causado dano de combate a um jogador neste turno com um Assassino ou Comandante.",
+      "lastUpdated": 1774397538887
+    },
+    "spree": {
+      "name": "Spree",
+      "translatedName": "Farra",
+      "definition": "Escolha um ou mais custos adicionais.",
+      "lastUpdated": 1774397540474
+    },
+    "saddle": {
+      "name": "Saddle",
+      "translatedName": "Sela",
+      "definition": "Vire qualquer número de outras criaturas que você controla com poder total igual ou superior a 1: Esta montaria fica selada até o final do turno. Selar apenas como feitiçaria.",
+      "lastUpdated": 1774397542044
+    },
+    "shadow": {
+      "name": "Shadow",
+      "translatedName": "Sombra",
+      "definition": "Esta criatura pode bloquear ou ser bloqueada apenas por criaturas com sombra.",
+      "lastUpdated": 1774397543462
+    },
+    "warp": {
+      "name": "Warp",
+      "translatedName": "Urdidura",
+      "definition": "Você pode conjurar esta carta da sua mão pagando seu custo de warp. Exile esta criatura no início da próxima etapa final, então você poderá conjurá-la do exílio em um turno posterior.",
+      "lastUpdated": 1774397545048
+    },
+    "station": {
+      "name": "Station",
+      "translatedName": "Estação",
+      "definition": "Vire outra criatura que você controla: Coloque marcadores de carga iguais ao seu poder neste Planeta. Estação apenas como feitiçaria.",
+      "lastUpdated": 1774397546706
+    },
+    "devour": {
+      "name": "Devour",
+      "translatedName": "Devorar",
+      "definition": "Conforme esta criatura entra, você pode sacrificar qualquer número de criaturas. Ele entra com aquela quantidade de marcadores +1/+1.",
+      "lastUpdated": 1774397548093
+    },
+    "undaunted": {
+      "name": "Undaunted",
+      "translatedName": "Destemido",
+      "definition": "Este feitiço custa {1} a menos para ser lançado para cada oponente.",
+      "lastUpdated": 1774397551288
+    },
+    "offspring": {
+      "name": "Offspring",
+      "translatedName": "Filhos",
+      "definition": "Você pode pagar um custo adicional de {1}{R} ao conjurar esta mágica. Se fizer isso, quando esta criatura entrar, crie uma cópia ficha 1/1 dela.",
+      "lastUpdated": 1774397553258
+    },
+    "impending": {
+      "name": "Impending",
+      "translatedName": "Iminente",
+      "definition": "Se você conjurar esta mágica pelo seu custo iminente, ela entra com cinco marcadores temporais e não é uma criatura até que o último seja removido. No início da etapa final, remova um contador de tempo dela.",
+      "lastUpdated": 1774397555950
+    },
+    "gift": {
+      "name": "Gift",
+      "translatedName": "Presente",
+      "definition": "Você pode prometer um presente a um oponente ao lançar esta magia. Se fizer isso, eles criam uma ficha de Tesouro antes de seus outros efeitos. É um artefato com \"{T}, sacrifique esta ficha: Adicione um mana de qualquer cor.\"",
+      "lastUpdated": 1774397557725
+    },
+    "harmonize": {
+      "name": "Harmonize",
+      "translatedName": "Harmonizar",
+      "definition": "Você pode conjurar este card de seu cemitério pagando seu custo de harmonização. Você pode virar uma criatura que você controla para reduzir esse custo em {X}, sendo X o seu poder. Então exile esta magia.",
+      "lastUpdated": 1774397560086
+    },
+    "exhaust": {
+      "name": "Exhaust",
+      "translatedName": "Escape",
+      "definition": "Ative cada habilidade de exaustão apenas uma vez.",
+      "lastUpdated": 1774397561956
+    },
+    "max speed": {
+      "name": "Max speed",
+      "translatedName": "Velocidade máxima",
+      "definition": "Cada oponente coloca os dois cards do topo de seu grimório em seu cemitério.",
+      "lastUpdated": 1774397564297
+    },
+    "fear": {
+      "name": "Fear",
+      "translatedName": "Temer",
+      "definition": "Esta criatura não pode ser bloqueada exceto por criaturas artefato e/ou criaturas pretas.",
+      "lastUpdated": 1774397565783
+    },
+    "tiered": {
+      "name": "Tiered",
+      "translatedName": "Em camadas",
+      "definition": "Escolha um custo adicional.",
+      "lastUpdated": 1774397567079
+    },
+    "mobilize": {
+      "name": "Mobilize",
+      "translatedName": "Mobilizar",
+      "definition": "Toda vez que esta criatura atacar, crie X fichas de criatura vermelhas 1/1 do tipo Guerreiro viradas e atacando. Sacrifique-os no início da próxima etapa final.",
+      "lastUpdated": 1774397569124
+    },
+    "double team": {
+      "name": "Double team",
+      "translatedName": "Equipe dupla",
+      "definition": "Não é uma criatura.",
+      "lastUpdated": 1774397571321
+    },
+    "job select": {
+      "name": "Job select",
+      "translatedName": "Seleção de trabalho",
+      "definition": "Quando este Equipamento entrar, crie uma ficha de criatura incolor 1/1 do tipo Herói e anexe-a a ela.",
+      "lastUpdated": 1774397575104
+    },
+    "mayhem": {
+      "name": "Mayhem",
+      "translatedName": "Caos",
+      "definition": "Você poderá conjurar este card de seu cemitério por {2}{U} se você o tiver descartado neste turno. As regras de tempo ainda se aplicam.",
+      "lastUpdated": 1774397576548
+    },
+    "web-slinging": {
+      "name": "Web-slinging",
+      "translatedName": "Lançamento de teia",
+      "definition": "Você poderá conjurar esta mágica por {W} se também devolver uma criatura virada que você controla para a mão de seu dono.",
+      "lastUpdated": 1774397577889
+    },
+    "prowl": {
+      "name": "Prowl",
+      "translatedName": "Espreitar",
+      "definition": "Você pode conjurar isso pagando seu custo de espreitar se tiver causado dano de combate a um jogador neste turno com um Goblin ou Ladino.",
+      "lastUpdated": 1774397579308
+    },
+    "solved": {
+      "name": "Solved",
+      "translatedName": "Resolvido",
+      "definition": "{1}: Anexe à criatura alvo que você controla. Equipe apenas como um feitiço.",
+      "lastUpdated": 1774397582407
+    },
+    "sneak": {
+      "name": "Sneak",
+      "translatedName": "Esgueirar-se",
+      "definition": "Você pode conjurar esta mágica por {1}{U} se também devolver um atacante desbloqueado que você controla para a mão durante a etapa de declaração de bloqueadores. Ele entra virado e atacando.",
+      "lastUpdated": 1774397583933
+    },
+    "firebending": {
+      "name": "Firebending",
+      "translatedName": "Dobra de fogo",
+      "definition": "Toda vez que esta criatura atacar, adicione {R}{R}. Esta mana dura até o final do combate.",
+      "lastUpdated": 1774397585722
+    },
+    "seek": {
+      "name": "Seek",
+      "translatedName": "Procurar",
+      "definition": "Para buscar um card, coloque um aleatoriamente de seu grimório em sua mão.",
+      "lastUpdated": 1774397587567
+    },
+    "attach": {
+      "name": "Attach",
+      "translatedName": "Anexar",
+      "definition": "{2}: Anexe à criatura alvo que você controla. Equipe apenas como um feitiço.",
+      "lastUpdated": 1774397603314
+    },
+    "discard": {
+      "name": "Discard",
+      "translatedName": "Descartar",
+      "definition": "Você pode conjurar este card virado para baixo como uma criatura 2/2 por {3}. Vire-o para cima a qualquer momento pelo seu custo de metamorfose.",
+      "lastUpdated": 1774397638064
+    },
+    "double": {
+      "name": "Double",
+      "translatedName": "Dobro",
+      "definition": "{3}{W}{W}, Exile este card de seu cemitério: Crie uma ficha que seja uma cópia dele, exceto que é um Gato Zumbi preto 4/4 sem custo de mana. Eternize apenas como feitiçaria.",
+      "lastUpdated": 1774397640958
+    },
+    "exile": {
+      "name": "Exile",
+      "translatedName": "Exílio",
+      "definition": "Ao pagar um custo de dobra de água, você pode virar seus artefatos e criaturas para ajudar. Cada um paga por {1}.",
+      "lastUpdated": 1774397647911
+    },
+    "adapt": {
+      "name": "Adapt",
+      "translatedName": "Adaptar",
+      "definition": "Se esta criatura não tiver marcadores +1/+1, coloque um marcador +1/+1 nela.",
+      "lastUpdated": 1774397649434
+    },
+    "support": {
+      "name": "Support",
+      "translatedName": "Apoiar",
+      "definition": "Coloque um marcador +1/+1 em cada uma de até duas outras criaturas alvo.",
+      "lastUpdated": 1774397650839
+    },
+    "regenerate": {
+      "name": "Regenerate",
+      "translatedName": "Regenerado",
+      "definition": "Na próxima vez que ele for destruído neste turno, vire-o, remova-o do combate e cure todo o dano causado nele.",
+      "lastUpdated": 1774397658497
+    },
+    "sacrifice": {
+      "name": "Sacrifice",
+      "translatedName": "Sacrifício",
+      "definition": "Ao pagar um custo de dobra de água, você pode virar seus artefatos e criaturas para ajudar. Cada um paga por {1}.",
+      "lastUpdated": 1774397665930
+    },
+    "vote": {
+      "name": "Vote",
+      "translatedName": "Voto",
+      "definition": "Você pode conjurar este card de seu cemitério transformado pagando seu custo de perturbação.",
+      "lastUpdated": 1774397686829
+    },
+    "time travel": {
+      "name": "Time Travel",
+      "translatedName": "Viagem no tempo",
+      "definition": "Para cada card suspenso que você possui e cada permanente que você controla com um marcador temporal, você pode adicionar ou remover um marcador temporal.",
+      "lastUpdated": 1774397688185
+    },
+    "goad": {
+      "name": "Goad",
+      "translatedName": "Incitar",
+      "definition": "Ele ataca cada combate se estiver apto e ataca um jogador que não seja você, se estiver apto.",
+      "lastUpdated": 1774397690456
+    },
+    "transform": {
+      "name": "Transform",
+      "translatedName": "Transformar",
+      "definition": "Para moer um card, coloque o card do topo do seu grimório em seu cemitério.",
+      "lastUpdated": 1774397700687
+    },
+    "surveil": {
+      "name": "Surveil",
+      "translatedName": "Vigilância",
+      "definition": "Olhe para o card do topo do seu grimório. Você pode colocar aquele card em seu cemitério.",
+      "lastUpdated": 1774397703249
+    },
+    "mill": {
+      "name": "Mill",
+      "translatedName": "Moinho",
+      "definition": "Para moer um card, coloque o card do topo do seu grimório em seu cemitério.",
+      "lastUpdated": 1774397710696
+    },
+    "learn": {
+      "name": "Learn",
+      "translatedName": "Aprender",
+      "definition": "Você pode revelar uma carta de Lição que você possui fora do jogo e colocá-la em sua mão ou descartar uma carta para comprar uma carta.",
+      "lastUpdated": 1774397712221
+    },
+    "connive": {
+      "name": "Connive",
+      "translatedName": "Conivente",
+      "definition": "Compre uma carta e depois descarte uma carta. Se você descartou um card que não seja um terreno, coloque um marcador +1/+1 nesta criatura.",
+      "lastUpdated": 1774397713791
+    },
+    "venture into the dungeon": {
+      "name": "Venture into the dungeon",
+      "translatedName": "Aventure-se na masmorra",
+      "definition": "Entre na primeira sala ou avance para a próxima sala.",
+      "lastUpdated": 1774397716989
+    },
+    "exert": {
+      "name": "Exert",
+      "translatedName": "Exercer",
+      "definition": "Uma criatura esgotada não será desvirada durante sua próxima etapa de desvirar.",
+      "lastUpdated": 1774397718503
+    },
+    "open an attraction": {
+      "name": "Open an Attraction",
+      "translatedName": "Abra uma atração",
+      "definition": "Coloque a carta do topo do seu baralho de Atração no campo de batalha.",
+      "lastUpdated": 1774397720733
+    },
+    "food": {
+      "name": "Food",
+      "translatedName": "Comida",
+      "definition": "É um artefato com \"{2}, {T}, sacrifique esta ficha: Você ganha 3 pontos de vida.\"",
+      "lastUpdated": 1774397725761
+    },
+    "discover": {
+      "name": "Discover",
+      "translatedName": "Descobrir",
+      "definition": "Exile cards do topo de seu grimório até exilar um card que não seja um terreno com valor de mana igual ou inferior a 3. Lance-o sem pagar seu custo de mana ou coloque-o em sua mão. Coloque o resto no fundo em ordem aleatória.",
+      "lastUpdated": 1774397727717
+    },
+    "explore": {
+      "name": "Explore",
+      "translatedName": "Explorar",
+      "definition": "Para que esta criatura explore, revele o card do topo do seu grimório. Coloque aquele card em sua mão se for um terreno. Caso contrário, coloque um marcador +1/+1 nesta criatura e depois devolva o card ou coloque-o em seu cemitério.",
+      "lastUpdated": 1774397731221
+    },
+    "treasure": {
+      "name": "Treasure",
+      "translatedName": "Tesouro",
+      "definition": "É um artefato com \"{T}, sacrifique este artefato: Adicione um mana de qualquer cor.\"",
+      "lastUpdated": 1774397744858
+    },
+    "fateseal": {
+      "name": "Fateseal",
+      "translatedName": "Selo Fatal",
+      "definition": "Para o Fateseal 1, seu controlador olha o card do topo do grimório de um oponente e então pode colocar aquele card no fundo desse grimório.",
+      "lastUpdated": 1774397752137
+    },
+    "manifest": {
+      "name": "Manifest",
+      "translatedName": "Manifesto",
+      "definition": "Olhe os dois cards do topo do seu grimório. Coloque um no campo de batalha virado para baixo como uma criatura 2/2 e o outro em seu cemitério. Vire-o para cima a qualquer momento pagando seu custo de mana se for um card de criatura.",
+      "lastUpdated": 1774397757927
+    },
+    "populate": {
+      "name": "Populate",
+      "translatedName": "Preencher",
+      "definition": "Crie uma ficha que seja uma cópia de uma ficha de criatura que você controla.",
+      "lastUpdated": 1774397760126
+    },
+    "detain": {
+      "name": "Detain",
+      "translatedName": "Deter",
+      "definition": "Até seu próximo turno, essas permanentes não poderão atacar ou bloquear e suas habilidades ativadas não poderão ser ativadas.",
+      "lastUpdated": 1774397761433
+    },
+    "investigate": {
+      "name": "Investigate",
+      "translatedName": "Investigar",
+      "definition": "Crie um token de pista. É um artefato com \"{2}, Sacrifique esta ficha: Compre um card.\"",
+      "lastUpdated": 1774397770299
+    },
+    "monstrosity": {
+      "name": "Monstrosity",
+      "translatedName": "Monstruosidade",
+      "definition": "Se esta criatura não for monstruosa, coloque quatro marcadores +1/+1 nela e ela se tornará monstruosa.",
+      "lastUpdated": 1774397772841
+    },
+    "clash": {
+      "name": "Clash",
+      "translatedName": "Choque",
+      "definition": "Cada jogador em conflito revela o card do topo de seu grimório e, em seguida, coloca esse card à sua escolha no topo ou no fundo. Um jogador vence se sua carta tiver um valor de mana maior.",
+      "lastUpdated": 1774397774555
+    },
+    "incubate": {
+      "name": "Incubate",
+      "translatedName": "Incubar",
+      "definition": "Crie uma ficha de Incubadora com dois marcadores +1/+1 e \"{2}: Transforme esta ficha.\" Ele se transforma em uma criatura artefato Phyrexiana 0/0.",
+      "lastUpdated": 1774397780747
+    },
+    "proliferate": {
+      "name": "Proliferate",
+      "translatedName": "Proliferar",
+      "definition": "Escolha qualquer número de permanentes e/ou jogadores e, em seguida, dê a cada um outro marcador de cada tipo que já esteja lá.",
+      "lastUpdated": 1774397786060
+    },
+    "convert": {
+      "name": "Convert",
+      "translatedName": "Converter",
+      "definition": "Eles entram com um marcador +1/+1 adicional. Quando eles morrerem, você poderá colocar seus marcadores +1/+1 na criatura artefato alvo.",
+      "lastUpdated": 1774397805738
+    },
+    "fight": {
+      "name": "Fight",
+      "translatedName": "Lutar",
+      "definition": "Você pode ter dois comandantes se o outro for o Doutor.",
+      "lastUpdated": 1774397810010
+    },
+    "bolster": {
+      "name": "Bolster",
+      "translatedName": "Reforçar",
+      "definition": "Escolha uma criatura com a menor resistência entre as criaturas que você controla e coloque um marcador +1/+1 nela.",
+      "lastUpdated": 1774397814717
+    },
+    "assemble": {
+      "name": "Assemble",
+      "translatedName": "Montar",
+      "definition": "Coloque a carta do topo do seu baralho de Engenhocas virada para cima em uma de suas rodas dentadas.",
+      "lastUpdated": 1774397816174
+    },
+    "amass": {
+      "name": "Amass",
+      "translatedName": "Acumular",
+      "definition": "Coloque dois marcadores +1/+1 em um Exército que você controla. Também é um zumbi. Se você não controla um Exército, crie primeiro uma ficha de criatura preta 0/0 do tipo Zumbi Exército.",
+      "lastUpdated": 1774397843026
+    },
+    "cloak": {
+      "name": "Cloak",
+      "translatedName": "Capa",
+      "definition": "Para camuflar um card, coloque-o no campo de batalha com a face voltada para baixo como uma criatura 2/2 com proteção {2}. Vire-o para cima a qualquer momento pagando seu custo de mana se for um card de criatura.",
+      "lastUpdated": 1774397844874
+    },
+    "suspect": {
+      "name": "Suspect",
+      "translatedName": "Suspeito",
+      "definition": "Uma criatura suspeita é ameaçadora e não pode bloquear.",
+      "lastUpdated": 1774397846266
+    },
+    "collect evidence": {
+      "name": "Collect evidence",
+      "translatedName": "Colete evidências",
+      "definition": "Exile cards com valor de mana total igual ou superior a 8 de seu cemitério.",
+      "lastUpdated": 1774397847961
+    },
+    "role token": {
+      "name": "Role token",
+      "translatedName": "Token de função",
+      "definition": "Se você controlar outro Papel nele, coloque-o no cemitério. A criatura encantada é 1/1.",
+      "lastUpdated": 1774397850845
+    },
+    "plot": {
+      "name": "Plot",
+      "translatedName": "Trama",
+      "definition": "Você pode pagar {1}{G} e exilar este card de sua mão. Lance-o como um feitiço em um turno posterior sem pagar seu custo de mana. Trama apenas como feitiçaria.",
+      "lastUpdated": 1774397853804
+    },
+    "forage": {
+      "name": "Forage",
+      "translatedName": "Forragem",
+      "definition": "Para coletar alimentos, exile três cards de seu cemitério ou sacrifique um alimento.",
+      "lastUpdated": 1774397861395
+    },
+    "manifest dread": {
+      "name": "Manifest dread",
+      "translatedName": "Medo manifesto",
+      "definition": "Olhe os dois cards do topo do seu grimório. Coloque um no campo de batalha virado para baixo como uma criatura 2/2 e o outro em seu cemitério. Vire-o para cima a qualquer momento pagando seu custo de mana se for um card de criatura.",
+      "lastUpdated": 1774397863704
+    },
+    "endure": {
+      "name": "Endure",
+      "translatedName": "Aguentar",
+      "definition": "Coloque dois marcadores +1/+1 nele ou crie uma ficha de criatura branca 2/2 do tipo Espírito.",
+      "lastUpdated": 1774397869099
+    },
+    "waterbend": {
+      "name": "Waterbend",
+      "translatedName": "Dobra de água",
+      "definition": "Ao pagar um custo de dobra de água, você pode virar seus artefatos e criaturas para ajudar. Cada um paga por {1}.",
+      "lastUpdated": 1774397870541
+    },
+    "airbend": {
+      "name": "Airbend",
+      "translatedName": "Dobra de Ar",
+      "definition": "Exile-o. Enquanto estiver exilado, seu dono poderá conjurá-lo por {2} em vez de seu custo de mana.",
+      "lastUpdated": 1774397871890
+    },
+    "earthbend": {
+      "name": "Earthbend",
+      "translatedName": "Dobra de terra",
+      "definition": "O terreno alvo que você controla torna-se uma criatura 0/0 com ímpeto que ainda é um terreno. Coloque dois marcadores +1/+1 nele. Quando ele morrer ou for exilado, devolva-o ao campo de batalha virado.",
+      "lastUpdated": 1774397873985
+    },
+    "blight": {
+      "name": "Blight",
+      "translatedName": "Praga",
+      "definition": "Para destruir 2, um jogador coloca dois marcadores -1/-1 em uma criatura que ele controla.",
+      "lastUpdated": 1774397876063
+    },
+    "behold": {
+      "name": "Behold",
+      "translatedName": "Contemplar",
+      "definition": "Para contemplar um Dragão, escolha um Dragão que você controla ou revele uma carta de Dragão da sua mão.",
+      "lastUpdated": 1774397877616
     }
   }
 }

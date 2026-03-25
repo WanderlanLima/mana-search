@@ -23,6 +23,8 @@ export default function App() {
   const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const [nightmareClicks, setNightmareClicks] = useState(0);
   const [isNightmareOpen, setIsNightmareOpen] = useState(false);
+  const [showKeywordsOnly, setShowKeywordsOnly] = useState(false);
+  const [keywordSearch, setKeywordSearch] = useState('');
   const nightmareTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
   // Initialize keyword service on startup
@@ -79,6 +81,7 @@ export default function App() {
     setLoading(true);
     setError(null);
     setShowDropdown(false);
+    setShowKeywordsOnly(false);
     try {
       const data = await scryfall.search(searchQuery, searchPage);
       if (searchPage === 1) {
@@ -123,18 +126,11 @@ export default function App() {
   };
 
   const searchKeywordsOnly = async () => {
-    try {
-      await keywordService.initialize();
-      const keys = Object.keys(keywordService.getAllDefinitions());
-      if (keys.length > 0) {
-        // Search for the first 3 keywords joined by OR
-        const searchQuery = keys.slice(0, 3).join(' OR ');
-        setQuery(searchQuery);
-        handleSearch(searchQuery, 1);
-      }
-    } catch (error) {
-      console.error(error);
-    }
+    setShowKeywordsOnly(true);
+    setKeywordSearch('');
+    setCards([]);
+    setHasMore(false);
+    setError(null);
   };
 
   return (
@@ -309,7 +305,7 @@ export default function App() {
         )}
 
         {/* Empty State */}
-        {!loading && cards.length === 0 && !error && (
+        {!loading && cards.length === 0 && !error && !showKeywordsOnly && (
           <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
               <Search size={32} className="text-white/20" />
@@ -336,15 +332,99 @@ export default function App() {
         )}
 
         {/* Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
-          {cards.map((card) => (
-            <CardItem
-              key={card.id}
-              card={card}
-              onClick={setSelectedCard}
-            />
-          ))}
-        </div>
+        {showKeywordsOnly ? (
+          <div className="space-y-8">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h3 className="text-2xl font-black flex items-center gap-3 tracking-tighter">
+                  <Sparkles className="text-purple-400" size={24} />
+                  DICIONÁRIO DE KEYWORDS
+                </h3>
+                <p className="text-xs text-white/40 font-bold uppercase tracking-widest mt-1">
+                  Base de dados técnica traduzida
+                </p>
+              </div>
+              <button 
+                onClick={() => setShowKeywordsOnly(false)}
+                className="px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-[10px] text-white/60 hover:text-white transition-all uppercase tracking-widest font-black"
+              >
+                Voltar para Cartas
+              </button>
+            </div>
+
+            {/* Dedicated Keyword Search Bar */}
+            <div className="relative group max-w-2xl">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-purple-400/50 group-focus-within:text-purple-400 transition-colors">
+                <Search size={18} />
+              </div>
+              <input
+                type="text"
+                value={keywordSearch}
+                onChange={(e) => setKeywordSearch(e.target.value)}
+                placeholder="Filtrar keywords (ex: voar, trample, ward)..."
+                className="w-full bg-purple-500/5 border border-purple-500/20 rounded-2xl py-4 pl-12 pr-4 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/30 focus:bg-purple-500/10 transition-all placeholder:text-purple-500/20"
+                autoFocus
+              />
+              {keywordSearch && (
+                <button
+                  onClick={() => setKeywordSearch('')}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/20 hover:text-white"
+                >
+                  <X size={16} />
+                </button>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {Object.entries(keywordService.getAllDefinitions())
+                .filter(([key, def]) => {
+                  if (!keywordSearch.trim()) return true;
+                  const q = keywordSearch.toLowerCase();
+                  return def.name.toLowerCase().includes(q) || 
+                         (def.translatedName && def.translatedName.toLowerCase().includes(q)) ||
+                         def.definition.toLowerCase().includes(q);
+                })
+                .map(([key, def]) => (
+                  <motion.div
+                    key={key}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-6 bg-white/5 border border-white/10 rounded-3xl hover:bg-white/10 transition-all group"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <h4 className="text-lg font-black uppercase tracking-tighter group-hover:text-purple-400 transition-colors">
+                        {def.translatedName || def.name}
+                      </h4>
+                      {def.translatedName && (
+                        <span className="text-[10px] text-white/20 font-bold uppercase tracking-widest">
+                          {def.name}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-white/60 leading-relaxed">
+                      {def.definition}
+                    </p>
+                  </motion.div>
+                ))}
+            </div>
+            
+            {Object.keys(keywordService.getAllDefinitions()).length === 0 && (
+              <div className="py-12 text-center text-white/20">
+                Nenhuma keyword catalogada ainda.
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 md:gap-6">
+            {cards.map((card) => (
+              <CardItem
+                key={card.id}
+                card={card}
+                onClick={setSelectedCard}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Loading State */}
         {loading && (
