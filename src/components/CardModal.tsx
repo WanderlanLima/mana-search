@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Languages, BookOpen, Info, ExternalLink, Loader2, HelpCircle, Sparkles } from 'lucide-react';
+import { X, Languages, BookOpen, Info, ExternalLink, Loader2, HelpCircle, Sparkles, Plus, Check } from 'lucide-react';
 import { ScryfallCard, scryfall, ScryfallRule } from '../lib/scryfall';
 import { translateToPTBR, translateRules } from '../lib/gemini';
 import { cn } from '../lib/utils';
 import { keywordService } from '../lib/keywordService';
+import { db } from '../lib/db';
+import { deckService } from '../lib/deckService';
+import { useLiveQuery } from 'dexie-react-hooks';
 
 interface CardModalProps {
   card: ScryfallCard;
@@ -24,6 +27,10 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
   const [keywordDefinition, setKeywordDefinition] = useState<string | null>(null);
   const [loadingKeyword, setLoadingKeyword] = useState(false);
   const [keywordsLoaded, setKeywordsLoaded] = useState(false);
+  const [isDeckMenuOpen, setIsDeckMenuOpen] = useState(false);
+  const [addingToDeckId, setAddingToDeckId] = useState<number | null>(null);
+
+  const decks = useLiveQuery(() => db.decks.toArray());
 
   useEffect(() => {
     const initKeywords = async () => {
@@ -151,6 +158,18 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
       console.error(error);
     } finally {
       setLoadingTranslation(false);
+    }
+  };
+
+  const handleAddToDeck = async (deckId: number) => {
+    setAddingToDeckId(deckId);
+    try {
+      await deckService.addCardToDeck(deckId, card);
+      // Show success briefly
+      setTimeout(() => setAddingToDeckId(null), 1500);
+    } catch (error) {
+      console.error("Error adding to deck:", error);
+      setAddingToDeckId(null);
     }
   };
 
@@ -420,12 +439,70 @@ export const CardModal: React.FC<CardModalProps> = ({ card: initialCard, onClose
           </div>
 
           {/* Action Footer */}
-          <div className="p-6 md:p-8 border-t border-white/5 bg-[#030303] md:backdrop-blur-xl sticky bottom-0 z-[80]">
+          <div className="p-6 md:p-8 border-t border-white/5 bg-[#030303] md:backdrop-blur-xl sticky bottom-0 z-[80] flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <button
+                onClick={() => setIsDeckMenuOpen(!isDeckMenuOpen)}
+                className="flex items-center justify-center gap-3 w-full py-4 bg-purple-600 text-white font-bold rounded-2xl hover:bg-purple-500 transition-all active:scale-[0.98] text-xs uppercase tracking-[0.2em] shadow-lg shadow-purple-600/20"
+              >
+                <Plus size={16} /> Add to Deck
+              </button>
+
+              <AnimatePresence>
+                {isDeckMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute bottom-full left-0 right-0 mb-4 bg-[#1a1a1a] border border-white/10 rounded-2xl overflow-hidden shadow-2xl z-[90]"
+                  >
+                    <div className="p-4 border-b border-white/5 bg-white/5">
+                      <p className="text-[10px] uppercase tracking-widest font-black text-white/40">Select Deck</p>
+                    </div>
+                    <div className="max-h-48 overflow-y-auto">
+                      {decks && decks.length > 0 ? (
+                        decks.map(deck => (
+                          <button
+                            key={deck.id}
+                            onClick={() => {
+                              if (deck.id) handleAddToDeck(deck.id);
+                              setIsDeckMenuOpen(false);
+                            }}
+                            className="w-full px-4 py-3 text-left text-sm hover:bg-white/5 transition-colors flex items-center justify-between group"
+                          >
+                            <span className="font-medium">{deck.name}</span>
+                            {addingToDeckId === deck.id ? (
+                              <Check size={14} className="text-green-400" />
+                            ) : (
+                              <Plus size={14} className="opacity-0 group-hover:opacity-40 transition-opacity" />
+                            )}
+                          </button>
+                        ))
+                      ) : (
+                        <div className="p-6 text-center">
+                          <p className="text-xs text-white/40 mb-3">No decks found.</p>
+                          <button 
+                            onClick={() => {
+                              // We'll handle deck creation in the main UI
+                              setIsDeckMenuOpen(false);
+                            }}
+                            className="text-[10px] uppercase tracking-widest font-bold text-purple-400 hover:text-purple-300"
+                          >
+                            Create your first deck
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             <a
               href={card.scryfall_uri}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-center gap-3 w-full py-4 bg-white text-black font-bold rounded-2xl hover:bg-purple-500 hover:text-white transition-all active:scale-[0.98] text-xs uppercase tracking-[0.2em]"
+              className="flex items-center justify-center gap-3 flex-1 py-4 bg-white/5 text-white/60 hover:text-white font-bold rounded-2xl hover:bg-white/10 transition-all active:scale-[0.98] text-xs uppercase tracking-[0.2em] border border-white/10"
             >
               View on Scryfall <ExternalLink size={16} />
             </a>

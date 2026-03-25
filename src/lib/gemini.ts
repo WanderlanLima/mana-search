@@ -117,7 +117,7 @@ export const translateMTG = async (text: string, type: 'keyword' | 'definition' 
     
     console.log("⚠️ Translation: Gemini returned empty result, falling back to Google Translate.");
     return await translateText(text, 'pt');
-  } catch (error) {
+  } catch (error: any) {
     console.error("❌ Gemini translation error:", error);
     console.log("🌐 Translation: Falling back to Google Translate due to error.");
     return await translateText(text, 'pt');
@@ -198,7 +198,7 @@ export const translateRules = async (rules: string[]) => {
     
     rulesCache[cacheKey] = translatedRules;
     return translatedRules;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Rules translation error:", error);
     return rules;
   }

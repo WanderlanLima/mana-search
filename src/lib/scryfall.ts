@@ -114,7 +114,7 @@ export const scryfall = {
         return { data: [], has_more: false, total_cards: 0 };
       }
       console.error('Scryfall search error:', error);
-      throw error;
+      throw new Error(error.response?.data?.details || error.message || 'Scryfall search error');
     }
   },
 
@@ -179,6 +179,16 @@ export const scryfall = {
         return [];
       }
       return [];
+    }
+  },
+
+  getCardById: async (id: string): Promise<ScryfallCard> => {
+    try {
+      const response = await axios.get(`${SCRYFALL_API}/cards/${id}`);
+      return response.data;
+    } catch (error: any) {
+      console.error('Scryfall getCardById error:', error);
+      throw new Error(error.response?.data?.details || error.message || 'Error fetching card by ID');
     }
   }
 };

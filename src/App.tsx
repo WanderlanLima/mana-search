@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu, ArrowLeft, ArrowRight, HelpCircle, Settings, Camera } from 'lucide-react';
+import { Search, Loader2, Sparkles, History, X, ChevronRight, ChevronLeft, Menu, ArrowLeft, ArrowRight, HelpCircle, Settings, Camera, Ghost, Layout, Database } from 'lucide-react';
 import { scryfall, ScryfallCard } from './lib/scryfall';
 import { CardItem } from './components/CardItem';
 import { CardModal } from './components/CardModal';
 import { NightmareStatus } from './components/NightmareStatus';
 import { SettingsModal } from './components/SettingsModal';
 import { CameraScanner } from './components/CameraScanner';
+import { DeckList } from './components/DeckList';
+import { DeckView } from './components/DeckView';
 import { cn } from './lib/utils';
 import { keywordService } from './lib/keywordService';
 
@@ -28,6 +30,8 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [showKeywordsOnly, setShowKeywordsOnly] = useState(false);
+  const [activeTab, setActiveTab] = useState<'search' | 'decks'>('search');
+  const [selectedDeckId, setSelectedDeckId] = useState<number | null>(null);
   const [keywordSearch, setKeywordSearch] = useState('');
   const nightmareTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
@@ -96,7 +100,7 @@ export default function App() {
       setHasMore(data.has_more);
       saveToHistory(searchQuery);
     } catch (err: any) {
-      setError(err.response?.data?.details || 'Erro ao buscar cartas. Tente novamente.');
+      setError(err.message || 'Erro ao buscar cartas. Tente novamente.');
       if (searchPage === 1) setCards([]);
     } finally {
       setLoading(false);
@@ -158,7 +162,41 @@ export default function App() {
           </div>
           
           <div className="flex items-center gap-4">
-            <NightmareStatus onKeywordMode={searchKeywordsOnly} />
+            <nav className="hidden md:flex items-center bg-white/5 rounded-xl p-1 mr-4">
+              <button
+                onClick={() => {
+                  setActiveTab('search');
+                  setSelectedDeckId(null);
+                  setShowKeywordsOnly(false);
+                }}
+                className={cn(
+                  "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                  activeTab === 'search' && !showKeywordsOnly ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white"
+                )}
+              >
+                Search
+              </button>
+              <button
+                onClick={() => {
+                  setActiveTab('decks');
+                  setSelectedDeckId(null);
+                  setShowKeywordsOnly(false);
+                }}
+                className={cn(
+                  "px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                  activeTab === 'decks' ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white"
+                )}
+              >
+                Decks
+              </button>
+            </nav>
+            <button 
+              onClick={() => setIsNightmareOpen(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-full transition-all group"
+            >
+              <Ghost size={14} className="text-purple-400 group-hover:scale-110 transition-transform" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Status</span>
+            </button>
             <button 
               onClick={() => setIsSettingsOpen(true)}
               className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
@@ -186,8 +224,27 @@ export default function App() {
           </motion.div>
         )}
 
-        {/* Search Section */}
-        {!showKeywordsOnly && (
+        {activeTab === 'decks' ? (
+          selectedDeckId ? (
+            <DeckView 
+              deckId={selectedDeckId} 
+              onBack={() => setSelectedDeckId(null)} 
+              onSelectCard={async (scryfallId) => {
+                try {
+                  const card = await scryfall.getCardById(scryfallId);
+                  setSelectedCard(card);
+                } catch (e) {
+                  console.error("Error loading card details:", e);
+                }
+              }}
+            />
+          ) : (
+            <DeckList onSelectDeck={setSelectedDeckId} />
+          )
+        ) : (
+          <>
+            {/* Search Section */}
+            {!showKeywordsOnly && (
           <div className="max-w-2xl mx-auto mb-12 md:mb-20">
             <div className="text-center mb-8">
               <motion.h2 
@@ -497,10 +554,55 @@ export default function App() {
             </button>
           </div>
         )}
-      </main>
+      </>
+    )}
+  </main>
+
+      {/* Mobile Navigation */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 glass-surface border-t border-white/5 px-6 py-3">
+        <div className="flex items-center justify-around max-w-md mx-auto">
+          <button
+            onClick={() => {
+              setActiveTab('search');
+              setSelectedDeckId(null);
+              setShowKeywordsOnly(false);
+            }}
+            className={cn(
+              "flex flex-col items-center gap-1 transition-colors",
+              activeTab === 'search' && !showKeywordsOnly ? "text-purple-400" : "text-white/40"
+            )}
+          >
+            <Search size={20} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Search</span>
+          </button>
+          <button
+            onClick={() => {
+              setActiveTab('decks');
+              setSelectedDeckId(null);
+              setShowKeywordsOnly(false);
+            }}
+            className={cn(
+              "flex flex-col items-center gap-1 transition-colors",
+              activeTab === 'decks' ? "text-purple-400" : "text-white/40"
+            )}
+          >
+            <Layout size={20} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Decks</span>
+          </button>
+          <button
+            onClick={() => {
+              setIsNightmareOpen(true);
+            }}
+            className="flex flex-col items-center gap-1 text-white/40"
+          >
+            <Ghost size={20} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Status</span>
+          </button>
+        </div>
+      </div>
 
       {/* Footer */}
-      <footer className="py-12 border-t border-white/5 mt-20">
+      <footer className="py-12 border-t border-white/5 mt-20 pb-24 md:pb-12">
         <div className="max-w-7xl mx-auto px-4 flex flex-col items-center">
           <div className="flex items-center gap-2 mb-4 opacity-20">
             <Search size={16} />

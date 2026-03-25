@@ -1,0 +1,469 @@
+import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ArrowLeft, Trash2, Plus, Minus, Info, BarChart3, PieChart, LayoutGrid, Layers, AlertTriangle, CheckCircle2, Languages, ExternalLink, Copy, Check, Sparkles } from 'lucide-react';
+import { db, DeckCard } from '../lib/db';
+import { deckService } from '../lib/deckService';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { cn } from '../lib/utils';
+
+interface DeckViewProps {
+  deckId: number;
+  onBack: () => void;
+  onSelectCard: (scryfallId: string) => void;
+}
+
+export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard }) => {
+  const [activeTab, setActiveTab] = useState<'cards' | 'stats'>('cards');
+  const [showValidation, setShowValidation] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const deck = useLiveQuery(() => db.decks.get(deckId));
+  const cards = useLiveQuery(() => db.deckCards.where('deckId').equals(deckId).toArray());
+  const validation = useLiveQuery(() => deckService.validateDeck(deckId), [deckId, cards]);
+  const stats = useLiveQuery(() => deckService.getDeckStats(deckId), [deckId, cards]);
+
+  const handleCopyList = async () => {
+    try {
+      const list = await deckService.exportDeckList(deckId);
+      await navigator.clipboard.writeText(list);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy deck list:', err);
+    }
+  };
+
+  const mainboard = useMemo(() => cards?.filter(c => !c.isSideboard && !c.isCommander) || [], [cards]);
+  const sideboard = useMemo(() => cards?.filter(c => c.isSideboard) || [], [cards]);
+  const commanders = useMemo(() => cards?.filter(c => c.isCommander) || [], [cards]);
+
+  const handleQuantityChange = async (cardId: number, delta: number) => {
+    const card = cards?.find(c => c.id === cardId);
+    if (card) {
+      try {
+        await deckService.updateCardQuantity(cardId, card.quantity + delta);
+      } catch (error) {
+        console.error("Error updating card quantity:", error);
+      }
+    }
+  };
+
+  const [deleteConfirmId, setDeleteConfirmId] = useState<number | null>(null);
+
+  const handleDeleteCard = async (cardId: number) => {
+    try {
+      if (deleteConfirmId === cardId) {
+        await deckService.removeCardFromDeck(cardId);
+        setDeleteConfirmId(null);
+      } else {
+        setDeleteConfirmId(cardId);
+        // Reset after 3 seconds
+        setTimeout(() => setDeleteConfirmId(null), 3000);
+      }
+    } catch (error) {
+      console.error("Error deleting card:", error);
+    }
+  };
+
+  const handleToggleCommander = async (cardId: number) => {
+    try {
+      await deckService.toggleCommander(cardId);
+    } catch (error) {
+      console.error("Error toggling commander:", error);
+    }
+  };
+
+  if (!deck) return null;
+
+  return (
+    <div className="space-y-8 pb-32">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div className="space-y-4">
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-white/40 hover:text-white transition-colors text-xs font-bold uppercase tracking-widest"
+          >
+            <ArrowLeft size={16} /> Voltar para Decks
+          </button>
+          <div>
+            <h2 className="text-4xl md:text-6xl font-display font-bold tracking-tighter leading-none">{deck.name}</h2>
+            <div className="flex items-center gap-4 mt-4">
+              <span className="px-3 py-1 bg-purple-600/20 text-purple-400 border border-purple-500/20 rounded-full text-[10px] font-black uppercase tracking-widest">
+                {deck.format}
+              </span>
+              <span className="text-white/20 text-xs font-mono flex items-center gap-2">
+                <Layers size={14} /> {validation?.counts.main || 0} / {deck.format === 'commander' ? '100' : '60+'} Cartas
+              </span>
+              {validation && (
+                <button
+                  onClick={() => setShowValidation(!showValidation)}
+                  className={cn(
+                    "flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-all",
+                    validation.isValid 
+                      ? "bg-green-500/10 text-green-400 border border-green-500/20" 
+                      : "bg-red-500/10 text-red-400 border border-red-500/20"
+                  )}
+                >
+                  {validation.isValid ? <CheckCircle2 size={12} /> : <AlertTriangle size={12} />}
+                  {validation.isValid ? "Válido" : "Erros de Regra"}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 p-1 bg-white/5 rounded-2xl w-fit">
+          <button
+            onClick={handleCopyList}
+            className={cn(
+              "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
+              copied ? "bg-green-500 text-white" : "text-white/40 hover:text-white hover:bg-white/5"
+            )}
+          >
+            {copied ? <Check size={14} /> : <Copy size={14} />}
+            {copied ? "Copiado!" : "Copiar Lista"}
+          </button>
+          <div className="w-px h-4 bg-white/10 mx-1"></div>
+          <button
+            onClick={() => setActiveTab('cards')}
+            className={cn(
+              "px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+              activeTab === 'cards' ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white/60"
+            )}
+          >
+            <LayoutGrid size={14} /> Cartas
+          </button>
+          <button
+            onClick={() => setActiveTab('stats')}
+            className={cn(
+              "px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+              activeTab === 'stats' ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white/60"
+            )}
+          >
+            <BarChart3 size={14} /> Estatísticas
+          </button>
+        </div>
+      </div>
+
+      <AnimatePresence>
+        {showValidation && validation && !validation.isValid && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
+          >
+            <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-[32px] space-y-4">
+              <div className="flex items-center gap-3 text-red-400">
+                <AlertTriangle size={20} />
+                <h4 className="font-bold text-sm uppercase tracking-widest">Problemas de Validação</h4>
+              </div>
+              <ul className="space-y-2">
+                {validation.errors.map((err, i) => (
+                  <li key={i} className="text-sm text-red-200/60 flex items-center gap-2">
+                    <div className="w-1 h-1 bg-red-400 rounded-full"></div> {err}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {activeTab === 'cards' ? (
+        <div className="space-y-12">
+          {/* Commanders */}
+          {deck.format === 'commander' && (
+            <section className="space-y-6">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] font-black text-purple-400">Comandante ({commanders.length})</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {commanders.map((card) => (
+                  <CardItem 
+                    key={card.id} 
+                    card={card} 
+                    onQuantityChange={handleQuantityChange}
+                    onDelete={handleDeleteCard}
+                    onSelect={onSelectCard}
+                    onToggleCommander={handleToggleCommander}
+                    deleteConfirmId={deleteConfirmId}
+                    isCommanderFormat={deck.format === 'commander'}
+                  />
+                ))}
+                {commanders.length === 0 && (
+                  <div className="col-span-full py-12 text-center border border-dashed border-white/5 rounded-[32px] bg-white/[0.02]">
+                    <p className="text-xs text-white/20 uppercase tracking-widest font-bold">Nenhum comandante definido</p>
+                    <p className="text-[10px] text-white/10 mt-2">Clique no ícone de estrela em uma carta para defini-la como comandante</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          )}
+
+          {/* Mainboard */}
+          <section className="space-y-6">
+            <div className="flex items-center justify-between border-b border-white/5 pb-4">
+              <h3 className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20">Mainboard ({validation?.counts.main || 0})</h3>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              {mainboard.map((card) => (
+                <CardItem 
+                  key={card.id} 
+                  card={card} 
+                  onQuantityChange={handleQuantityChange}
+                  onDelete={handleDeleteCard}
+                  onSelect={onSelectCard}
+                  onToggleCommander={handleToggleCommander}
+                  deleteConfirmId={deleteConfirmId}
+                  isCommanderFormat={deck.format === 'commander'}
+                />
+              ))}
+            </div>
+          </section>
+
+          {/* Sideboard */}
+          {sideboard.length > 0 && (
+            <section className="space-y-6">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                <h3 className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20">Sideboard ({validation?.counts.side || 0})</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                {sideboard.map((card) => (
+                  <CardItem 
+                    key={card.id} 
+                    card={card} 
+                    onQuantityChange={handleQuantityChange}
+                    onDelete={handleDeleteCard}
+                    onSelect={onSelectCard}
+                    deleteConfirmId={deleteConfirmId}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Mana Curve */}
+          <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[40px] space-y-8">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <BarChart3 size={20} className="text-purple-400" />
+                <h3 className="text-xl font-bold">Curva de Mana</h3>
+              </div>
+              <div className="text-[10px] font-black uppercase tracking-widest text-white/40 bg-white/5 px-3 py-1 rounded-lg border border-white/5">
+                Avg CMC: <span className="text-purple-400">{stats?.avgCmc}</span>
+              </div>
+            </div>
+            <div className="flex items-end gap-2 h-48">
+              {Object.entries(stats?.manaCurve || {}).map(([cmc, count]) => {
+                const max = Math.max(...Object.values(stats?.manaCurve || {}));
+                const height = (count / max) * 100;
+                return (
+                  <div key={cmc} className="flex-1 flex flex-col items-center gap-2 group">
+                    <div className="w-full relative">
+                      <motion.div
+                        initial={{ height: 0 }}
+                        animate={{ height: `${height}%` }}
+                        className="w-full bg-purple-600/40 group-hover:bg-purple-500 transition-all rounded-t-lg border-x border-t border-purple-500/20"
+                      ></motion.div>
+                      <div className="absolute -top-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity text-[10px] font-bold">
+                        {count}
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-white/20">{cmc}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Colors */}
+          <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[40px] space-y-8">
+            <div className="flex items-center gap-3">
+              <PieChart size={20} className="text-purple-400" />
+              <h3 className="text-xl font-bold">Distribuição de Cores</h3>
+            </div>
+            <div className="space-y-4">
+              {Object.entries(stats?.colors || {}).map(([color, count]) => {
+                const total = Object.values(stats?.colors || {}).reduce((a, b) => a + b, 0);
+                const percent = (count / total) * 100;
+                const colorMap: Record<string, string> = {
+                  'W': 'bg-yellow-100',
+                  'U': 'bg-blue-500',
+                  'B': 'bg-gray-800',
+                  'R': 'bg-red-500',
+                  'G': 'bg-green-500'
+                };
+                return (
+                  <div key={color} className="space-y-1">
+                    <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+                      <span className="flex items-center gap-2">
+                        <div className={cn("w-2 h-2 rounded-full", colorMap[color])}></div> {color}
+                      </span>
+                      <span className="text-white/40">{count} ({percent.toFixed(1)}%)</span>
+                    </div>
+                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${percent}%` }}
+                        className={cn("h-full", colorMap[color])}
+                      ></motion.div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Types */}
+          <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[40px] space-y-8 lg:col-span-2">
+            <div className="flex items-center gap-3">
+              <PieChart size={20} className="text-purple-400" />
+              <h3 className="text-xl font-bold">Distribuição de Tipos</h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.entries(stats?.types || {})
+                .sort((a, b) => b[1] - a[1])
+                .map(([type, count]) => {
+                  const total = cards?.reduce((sum, c) => sum + c.quantity, 0) || 1;
+                  const percent = (count / total) * 100;
+                  return (
+                    <div key={type} className="space-y-2 p-4 bg-white/5 rounded-2xl border border-white/5">
+                      <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-widest">
+                        <span className="text-purple-400">{type}</span>
+                        <span className="text-white/40">{count}</span>
+                      </div>
+                      <div className="h-1.5 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${Math.min(percent, 100)}%` }}
+                          className="h-full bg-purple-500"
+                        ></motion.div>
+                      </div>
+                      <div className="text-[10px] text-white/20 font-mono text-right">
+                        {percent.toFixed(1)}% do deck
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const CardItem: React.FC<{
+  card: DeckCard;
+  onQuantityChange: (id: number, delta: number) => void;
+  onDelete: (id: number) => void;
+  onSelect: (id: string) => void;
+  onToggleCommander?: (id: number) => void;
+  deleteConfirmId: number | null;
+  isCommanderFormat?: boolean;
+}> = ({ card, onQuantityChange, onDelete, onSelect, onToggleCommander, deleteConfirmId, isCommanderFormat }) => {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="group relative space-y-3"
+    >
+      <div 
+        onClick={() => onSelect(card.scryfallId)}
+        className={cn(
+          "relative aspect-[63/88] rounded-[4.75% / 3.5%] overflow-hidden border transition-all cursor-pointer shadow-xl",
+          card.isCommander ? "border-purple-500 shadow-purple-500/20" : "border-white/5 group-hover:border-purple-500/50"
+        )}
+      >
+        <img
+          src={card.imageUri}
+          alt={card.name}
+          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+          referrerPolicy="no-referrer"
+        />
+        
+        {/* Overlays */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
+          <div className="flex items-center gap-2 text-[10px] text-purple-400 font-bold uppercase tracking-widest">
+            <Languages size={12} /> Tradução Salva
+          </div>
+        </div>
+
+        {card.isCommander && (
+          <div className="absolute inset-0 border-4 border-purple-500/30 pointer-events-none"></div>
+        )}
+        
+        {/* Badges */}
+        <div className="absolute top-2 left-2 flex flex-col gap-1">
+          {card.isCommander && (
+            <div className="px-2 py-1 bg-purple-600 text-white border border-purple-400/50 rounded-lg text-[8px] font-black uppercase tracking-widest shadow-lg">
+              Comandante
+            </div>
+          )}
+        </div>
+
+        <div className="absolute top-2 right-2 px-2 py-1 bg-black/80 backdrop-blur-md border border-white/10 rounded-lg text-xs font-bold shadow-2xl">
+          x{card.quantity}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-start justify-between gap-2">
+          <h4 className="text-sm font-bold truncate group-hover:text-purple-400 transition-colors flex-1">{card.translatedName || card.name}</h4>
+          <span className="text-[10px] font-mono text-white/40 mt-0.5 shrink-0">{card.manaCost}</span>
+        </div>
+        <p className="text-[10px] text-white/20 truncate uppercase tracking-widest">{card.typeLine}</p>
+        <div className="flex items-center justify-between pt-1">
+          <div className="flex items-center p-1 bg-white/5 rounded-xl border border-white/5">
+            <button
+              onClick={() => card.id && onQuantityChange(card.id, -1)}
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <Minus size={12} />
+            </button>
+            <span className="px-3 text-xs font-bold font-mono">{card.quantity}</span>
+            <button
+              onClick={() => card.id && onQuantityChange(card.id, 1)}
+              className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <Plus size={12} />
+            </button>
+          </div>
+          
+          <div className="flex items-center gap-1">
+            {isCommanderFormat && onToggleCommander && (
+              <button
+                onClick={() => card.id && onToggleCommander(card.id)}
+                className={cn(
+                  "p-2 rounded-xl transition-all",
+                  card.isCommander 
+                    ? "bg-purple-600 text-white" 
+                    : "text-white/10 hover:text-purple-400 hover:bg-purple-400/10"
+                )}
+                title={card.isCommander ? "Remover Comandante" : "Definir como Comandante"}
+              >
+                <Sparkles size={14} />
+              </button>
+            )}
+            <button
+              onClick={() => card.id && onDelete(card.id)}
+              className={cn(
+                "p-2 transition-all rounded-xl",
+                deleteConfirmId === card.id 
+                  ? "bg-red-500 text-white scale-110" 
+                  : "text-white/10 hover:text-red-400"
+              )}
+            >
+              <Trash2 size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
