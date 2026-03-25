@@ -26,7 +26,8 @@ export class DeckService {
     quantity: number = 1, 
     isSideboard: boolean = false,
     skipTranslation: boolean = false,
-    skipDeckUpdate: boolean = false
+    skipDeckUpdate: boolean = false,
+    mode: 'add' | 'set' = 'add'
   ) {
     // Check if card already exists in deck (same sideboard status)
     const existing = await db.deckCards
@@ -34,8 +35,9 @@ export class DeckService {
       .first();
 
     if (existing && existing.id) {
+      const newQuantity = mode === 'add' ? existing.quantity + quantity : quantity;
       await db.deckCards.update(existing.id, {
-        quantity: existing.quantity + quantity
+        quantity: newQuantity
       });
     } else {
       // Fetch translation if possible (to save offline)
@@ -298,14 +300,19 @@ export class DeckService {
         
         // Map scryfall results back to our parsed cards
         for (const parsed of batch) {
-          const found = scryfallCards.find(sc => 
-            sc.name.toLowerCase() === parsed.name.toLowerCase() || 
-            (sc.printed_name && sc.printed_name.toLowerCase() === parsed.name.toLowerCase())
-          );
+          const found = scryfallCards.find(sc => {
+            const scName = sc.name.toLowerCase();
+            const parsedName = parsed.name.toLowerCase();
+            
+            return scName === parsedName || 
+                   scName.startsWith(parsedName + " //") ||
+                   (sc.printed_name && sc.printed_name.toLowerCase() === parsedName);
+          });
 
           if (found) {
             // We use addCardToDeck with skipTranslation and skipDeckUpdate for speed
-            await this.addCardToDeck(deckId, found, parsed.quantity, parsed.isSideboard, true, true);
+            // We use mode 'set' to avoid duplicating cards if re-importing the same list
+            await this.addCardToDeck(deckId, found, parsed.quantity, parsed.isSideboard, true, true, 'set');
             added.push(`${parsed.quantity}x ${found.name}`);
           } else {
             notFound.push(parsed.name);

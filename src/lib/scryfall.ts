@@ -213,7 +213,16 @@ export const scryfall = {
     // 1. Try local first
     const syncStatus = await db.syncStatus.get('oracle_cards');
     if (syncStatus && syncStatus.status === 'idle') {
-      const localCard = await db.allCards.where('name').equalsIgnoreCase(name).first();
+      // Try exact match first
+      let localCard = await db.allCards.where('name').equalsIgnoreCase(name).first();
+      
+      // If not found, try matching the front face of a DFC (e.g. "Fell the Profane" matches "Fell the Profane // Fell Mire")
+      if (!localCard) {
+        localCard = await db.allCards
+          .filter(c => c.name.toLowerCase().startsWith(name.toLowerCase() + " //"))
+          .first();
+      }
+      
       if (localCard) return localCard;
     }
 
