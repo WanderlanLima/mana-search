@@ -12,7 +12,7 @@ import { useStore } from './store/useStore';
 const CardModal = lazy(() => import('./components/CardModal').then(m => ({ default: m.CardModal })));
 const NightmareStatus = lazy(() => import('./components/NightmareStatus').then(m => ({ default: m.NightmareStatus })));
 const SettingsModal = lazy(() => import('./components/SettingsModal').then(m => ({ default: m.SettingsModal })));
-const CameraScanner = lazy(() => import('./components/CameraScanner').then(m => ({ default: m.CameraScanner })));
+const LiveScanner = lazy(() => import('./components/LiveScanner').then(m => ({ default: m.LiveScanner })));
 
 
 export default function App() {
@@ -632,7 +632,7 @@ export default function App() {
           onClose={() => setIsSettingsOpen(false)} 
         />
 
-        <CameraScanner 
+        <LiveScanner 
           isOpen={isCameraOpen} 
           onClose={() => setIsCameraOpen(false)} 
           onDetected={(name) => {
