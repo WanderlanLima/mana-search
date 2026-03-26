@@ -246,8 +246,9 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
       const ctx = cropCanvas.getContext('2d');
       if (!ctx) return;
 
-      // Ensure good contrast for OCR
-      ctx.filter = 'contrast(120%) brightness(110%)';
+      // Filtro Anti-Moiré agressivo para monitores:
+      // Derrete a grade de pixels (blur) e estoura o contraste para focar na letra preta/branca.
+      ctx.filter = 'grayscale(100%) blur(1.5px) contrast(300%) brightness(120%)';
       ctx.drawImage(originalCanvas, finalSx, finalSy, finalSWidth, finalSHeight, 0, 0, finalSWidth, finalSHeight);
       
       const croppedBase64 = cropCanvas.toDataURL('image/jpeg', 0.9);
