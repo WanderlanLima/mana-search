@@ -84,6 +84,38 @@ async function startServer() {
     }
   });
 
+  app.post('/api/analyzeDeck', async (req, res) => {
+    const { decklist, commander } = req.body;
+    if (!decklist) return res.status(400).json({ error: 'Decklist is required' });
+    
+    const ai = getAi();
+    if (!ai) return res.status(503).json({ error: 'GEMINI_NOT_CONFIGURED' });
+
+    try {
+      const prompt = `Como um expert e jogador profissional de Magic: The Gathering, analise a seguinte lista de deck. 
+${commander ? `O Comandante do deck é: ${commander}.` : ''}
+
+Forneça um resumo estratégico profundo, mas direto e muito bem formatado em Markdown. Divida em três seções:
+1. **Estratégia Principal**: Qual é o plano de jogo e arquétipo geral?
+2. **Sinergias e Combos**: Destaque as interações entre peças chave da lista.
+3. **Condições de Vitória (Wincons)**: Como o deck finaliza o jogo?
+
+Retorne sua análise inteiramente em Português do Brasil (PT-BR).
+
+Lista do Deck:
+${decklist}`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
+        contents: prompt,
+        config: { temperature: 0.3 }
+      });
+      res.json({ strategy: response.text?.trim() });
+    } catch (error: any) {
+      res.status(500).json({ error: error.message });
+    }
+  });
+
   // Vite middleware for development
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({

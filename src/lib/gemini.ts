@@ -73,6 +73,27 @@ export const identifyCardFromImage = async (base64Image: string): Promise<string
   }
 };
 
+export const analyzeDeckStrategy = async (decklist: string, commander?: string): Promise<string | null> => {
+  try {
+    const response = await fetch('/api/analyzeDeck', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ decklist, commander })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Server error');
+    }
+
+    const result = await response.json();
+    return result.strategy || null;
+  } catch (error: any) {
+    console.error("Gemini Analyze Deck API error:", error);
+    return "Não foi possível gerar a estratégia de deck devido a um erro de comunicação com a Inteligência Artificial.";
+  }
+};
+
 export const translateToPTBR = async (text: string, type: 'keyword' | 'definition' | 'oracle' = 'oracle') => {
   if (!text || text.trim() === "") return text;
   

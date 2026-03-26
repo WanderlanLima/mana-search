@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, Plus, Minus, Info, BarChart3, PieChart, LayoutGrid, Layers, AlertTriangle, CheckCircle2, Languages, ExternalLink, Copy, Check, Sparkles, FileUp, X, Loader2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, Info, BarChart3, PieChart, LayoutGrid, Layers, AlertTriangle, CheckCircle2, Languages, ExternalLink, Copy, Check, Sparkles, FileUp, X, Loader2, BrainCircuit } from 'lucide-react';
 import { db, DeckCard } from '../lib/db';
 import { deckService } from '../lib/deckService';
+import { analyzeDeckStrategy } from '../lib/gemini';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { cn } from '../lib/utils';
 
@@ -17,6 +18,8 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
   const [showValidation, setShowValidation] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [strategy, setStrategy] = useState<string | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   const deck = useLiveQuery(() => db.decks.get(deckId));
   const cards = useLiveQuery(() => db.deckCards.where('deckId').equals(deckId).toArray());
@@ -37,6 +40,39 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
   const mainboard = useMemo(() => cards?.filter(c => !c.isSideboard && !c.isCommander) || [], [cards]);
   const sideboard = useMemo(() => cards?.filter(c => c.isSideboard) || [], [cards]);
   const commanders = useMemo(() => cards?.filter(c => c.isCommander) || [], [cards]);
+
+  const categories = useMemo(() => {
+    const creatures = mainboard.filter(c => c.typeLine.includes('Creature'));
+    const planeswalkers = mainboard.filter(c => c.typeLine.includes('Planeswalker') || c.typeLine.includes('Battle'));
+    const artifactsEnchantments = mainboard.filter(c => !c.typeLine.includes('Creature') && (c.typeLine.includes('Artifact') || c.typeLine.includes('Enchantment')));
+    const instantsSorceries = mainboard.filter(c => c.typeLine.includes('Instant') || c.typeLine.includes('Sorcery'));
+    const lands = mainboard.filter(c => c.typeLine.includes('Land'));
+    const others = mainboard.filter(c => !c.typeLine.includes('Creature') && !c.typeLine.includes('Planeswalker') && !c.typeLine.includes('Battle') && !c.typeLine.includes('Artifact') && !c.typeLine.includes('Enchantment') && !c.typeLine.includes('Instant') && !c.typeLine.includes('Sorcery') && !c.typeLine.includes('Land'));
+
+    return [
+      { title: 'Criaturas', data: creatures },
+      { title: 'Mágicas Instantâneas & Feitiços', data: instantsSorceries },
+      { title: 'Artefatos & Encantamentos', data: artifactsEnchantments },
+      { title: 'Planeswalkers & Batalhas', data: planeswalkers },
+      { title: 'Terrenos', data: lands },
+      { title: 'Outros', data: others }
+    ].filter(cat => cat.data.length > 0);
+  }, [mainboard]);
+
+  const handleAnalyzeStrategy = async () => {
+    setIsAnalyzing(true);
+    try {
+      const list = await deckService.exportDeckList(deckId);
+      const cmdName = commanders.map(c => c.name).join(' e ');
+      const result = await analyzeDeckStrategy(list, cmdName);
+      setStrategy(result);
+    } catch (err) {
+      console.error("Failed to analyze deck:", err);
+      setStrategy("Falha ao se comunicar com a Inteligência Artificial.");
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
 
   const handleQuantityChange = async (cardId: number, delta: number) => {
     const card = cards?.find(c => c.id === cardId);
@@ -209,26 +245,33 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
             </section>
           )}
 
-          {/* Mainboard */}
-          <section className="space-y-6">
-            <div className="flex items-center justify-between border-b border-white/5 pb-4">
-              <h3 className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20">Mainboard ({validation?.counts.main || 0})</h3>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-              {mainboard.map((card) => (
-                <CardItem 
-                  key={card.id} 
-                  card={card} 
-                  onQuantityChange={handleQuantityChange}
-                  onDelete={handleDeleteCard}
-                  onSelect={onSelectCard}
-                  onToggleCommander={handleToggleCommander}
-                  deleteConfirmId={deleteConfirmId}
-                  isCommanderFormat={deck.format === 'commander'}
-                />
-              ))}
-            </div>
-          </section>
+          {/* Categorized Mainboard */}
+          {categories.map((category, idx) => {
+            const sumCount = category.data.reduce((sum, c) => sum + c.quantity, 0);
+            return (
+              <section key={idx} className="space-y-6">
+                <div className="flex items-center justify-between border-b border-white/5 pb-4">
+                  <h3 className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20">
+                    {category.title} ({sumCount})
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                  {category.data.map((card) => (
+                    <CardItem 
+                      key={card.id} 
+                      card={card} 
+                      onQuantityChange={handleQuantityChange}
+                      onDelete={handleDeleteCard}
+                      onSelect={onSelectCard}
+                      onToggleCommander={handleToggleCommander}
+                      deleteConfirmId={deleteConfirmId}
+                      isCommanderFormat={deck.format === 'commander'}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })}
 
           {/* Sideboard */}
           {sideboard.length > 0 && (
@@ -253,6 +296,64 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* AI Strategy Generator */}
+          <div className="p-8 bg-gradient-to-br from-purple-900/40 via-[#0a0a0a] to-[#0a0a0a] border border-purple-500/20 rounded-[40px] space-y-6 lg:col-span-2 shadow-2xl shadow-purple-900/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 relative z-10">
+              <div className="space-y-1">
+                <div className="flex items-center gap-3">
+                  <BrainCircuit size={24} className="text-purple-400" />
+                  <h3 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-purple-200 bg-clip-text text-transparent">Mentoria Estratégica (IA)</h3>
+                </div>
+                <p className="text-xs text-purple-200/50 uppercase tracking-widest font-bold ml-9">Gemini AI Analysis</p>
+              </div>
+              <button
+                onClick={handleAnalyzeStrategy}
+                disabled={isAnalyzing}
+                className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-purple-600/30 disabled:opacity-50 flex items-center gap-2 justify-center"
+              >
+                {isAnalyzing ? <Loader2 size={16} className="animate-spin" /> : <Sparkles size={16} />}
+                {isAnalyzing ? "Analisando Deck..." : "Gerar Estratégia do Deck"}
+              </button>
+            </div>
+
+            <AnimatePresence>
+              {strategy && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="mt-6 p-6 bg-black/40 border border-purple-500/10 rounded-3xl backdrop-blur-sm"
+                >
+                  <div className="prose prose-invert prose-purple max-w-none prose-sm sm:prose-base 
+                                prose-headings:font-display prose-headings:font-bold prose-headings:tracking-tight
+                                prose-p:text-white/70 prose-strong:text-purple-300 prose-ul:text-white/70 text-sm whitespace-pre-wrap leading-relaxed">
+                    {strategy.split('\n').map((line, i) => {
+                      if (line.startsWith('**') && line.endsWith('**')) {
+                        return <h4 key={i} className="text-purple-400 text-lg mt-4 mb-2">{line.replace(/\*\*/g, '')}</h4>;
+                      }
+                      if (line.startsWith('#')) {
+                        return <h3 key={i} className="text-xl font-bold text-white mt-6 mb-3 border-b border-white/10 pb-2">{line.replace(/#/g, '').trim()}</h3>;
+                      }
+                      // Basic bold parsing within lines
+                      let renderLine = line;
+                      const boldParts = line.split(/(\*\*.*?\*\*)/g);
+                      return (
+                        <p key={i} className="mb-2">
+                          {boldParts.map((part, j) => {
+                            if (part.startsWith('**') && part.endsWith('**')) {
+                              return <strong key={j} className="text-purple-300 font-bold">{part.replace(/\*\*/g, '')}</strong>;
+                            }
+                            return part;
+                          })}
+                        </p>
+                      );
+                    })}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Mana Curve */}
           <div className="p-8 bg-white/[0.03] border border-white/5 rounded-[40px] space-y-8">
             <div className="flex items-center justify-between">
