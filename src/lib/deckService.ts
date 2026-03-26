@@ -293,7 +293,9 @@ export class DeckService {
     const BATCH_SIZE = 75;
     for (let i = 0; i < parsedCards.length; i += BATCH_SIZE) {
       const batch = parsedCards.slice(i, i + BATCH_SIZE);
-      const names = batch.map(p => p.name);
+      // Scryfall Collection API fails when finding exactly "Card // Face". 
+      // It expects just the front face name ("Card").
+      const names = batch.map(p => p.name.includes('//') ? p.name.split('//')[0].trim() : p.name);
       
       try {
         const scryfallCards = await scryfall.getCardsByNames(names);
@@ -303,9 +305,11 @@ export class DeckService {
           const found = scryfallCards.find(sc => {
             const scName = sc.name.toLowerCase();
             const parsedName = parsed.name.toLowerCase();
+            const parsedFrontName = parsedName.includes('//') ? parsedName.split('//')[0].trim() : parsedName;
             
             return scName === parsedName || 
                    scName.startsWith(parsedName + " //") ||
+                   scName.startsWith(parsedFrontName + " //") ||
                    (sc.printed_name && sc.printed_name.toLowerCase() === parsedName);
           });
 
