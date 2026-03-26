@@ -100,7 +100,7 @@ class KeywordService {
   }
 
   getKeywordCount() {
-    return this.keywords.length;
+    return Object.keys(this.definitions).length;
   }
 
   getAllDefinitions() {
