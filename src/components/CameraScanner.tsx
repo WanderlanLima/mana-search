@@ -21,6 +21,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
   const [error, setError] = useState<string | null>(null);
   const [hasKey, setHasKey] = useState(false);
   const [ocrMode, setOcrMode] = useState(false);
+  const [useAI, setUseAI] = useState(true);
 
   // Highlighter Feature States
   const [frozenImage, setFrozenImage] = useState<string | null>(null);
@@ -246,18 +247,24 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
       const ctx = cropCanvas.getContext('2d');
       if (!ctx) return;
 
-      // Filtro Anti-Moiré agressivo para monitores:
-      // Derrete a grade de pixels (blur) e estoura o contraste para focar na letra preta/branca.
-      ctx.filter = 'grayscale(100%) blur(1.5px) contrast(300%) brightness(120%)';
+      // Destrói o efeito Moiré suavizando a grade RGB de monitores
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = 'high';
+      ctx.filter = 'grayscale(100%) blur(1.2px) contrast(300%) brightness(130%)';
       ctx.drawImage(originalCanvas, finalSx, finalSy, finalSWidth, finalSHeight, 0, 0, finalSWidth, finalSHeight);
       
-      const croppedBase64 = cropCanvas.toDataURL('image/jpeg', 0.9);
-
+      const croppedBase64 = cropCanvas.toDataURL('image/png'); // PNG for lossless text
       let cardName: string | null = null;
-      try {
-        cardName = await identifyCardFromImage(croppedBase64);
-      } catch (geminiError: any) {
-        console.warn("Gemini failed, switching to OCR mode:", geminiError.message);
+      
+      if (useAI) {
+        try {
+          cardName = await identifyCardFromImage(croppedBase64);
+        } catch (geminiError: any) {
+          console.warn("Gemini failed, switching to OCR mode:", geminiError.message);
+          setOcrMode(true);
+          cardName = await performLocalOCR(croppedBase64);
+        }
+      } else {
         setOcrMode(true);
         cardName = await performLocalOCR(croppedBase64);
       }
@@ -411,12 +418,27 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
                   <Camera size={32} className="text-black" />
                   <div className="absolute -inset-2 border-2 border-white/20 rounded-full" />
                 </button>
-                <div className="mt-6 flex items-center gap-2 text-white/40">
-                  <Sparkles size={14} />
-                  <p className="text-[10px] uppercase tracking-widest font-bold">
-                    Powered by Gemini Vision
-                  </p>
-                </div>
+                <button 
+                  onClick={() => setUseAI(!useAI)}
+                  className="mt-6 flex items-center gap-2 p-2 rounded-xl transition-all hover:bg-white/5 active:scale-95 border border-transparent"
+                  style={{ borderColor: useAI ? 'rgba(168, 85, 247, 0.2)' : 'rgba(255, 255, 255, 0.1)' }}
+                >
+                  {useAI ? (
+                    <>
+                      <Sparkles size={14} className="text-purple-400" />
+                      <p className="text-[10px] uppercase tracking-widest font-bold text-purple-400">
+                        Inteligência Artificial Ativada
+                      </p>
+                    </>
+                  ) : (
+                    <>
+                      <Scan size={14} className="text-white/60" />
+                      <p className="text-[10px] uppercase tracking-widest font-bold text-white/60">
+                        Scanner Offline Rápido (Economia de IA)
+                      </p>
+                    </>
+                  )}
+                </button>
               </div>
             ) : (
               // Highlight State
