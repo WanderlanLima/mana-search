@@ -150,15 +150,15 @@ export default function App() {
             className="flex items-center gap-3 cursor-pointer select-none active:scale-95 transition-transform"
             onClick={handleNightmareClick}
           >
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center shadow-lg shadow-purple-500/20 flex-shrink-0">
               <Sparkles size={18} className="text-white" />
             </div>
-            <h1 className="font-display text-xl font-bold tracking-tight text-gradient">
+            <h1 className="font-display text-lg sm:text-xl font-bold tracking-tight text-gradient whitespace-nowrap">
               Mana Search
             </h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <nav className="hidden md:flex items-center bg-white/5 rounded-xl p-1 mr-4">
               <button
                 onClick={() => {
@@ -188,23 +188,20 @@ export default function App() {
               </button>
             </nav>
             <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsCameraOpen(true)}
-              className="p-3 sm:px-6 sm:py-3 glass-surface hover:bg-white/10 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 text-[#d095ff] glow-purple hover:glow-purple-strong shadow-lg border border-[#d095ff]/20"
-            >
-              <Camera size={18} />
-              <span className="hidden sm:inline tracking-wide">Escanear</span>
-            </button>
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-3 glass-surface hover:bg-white/10 rounded-full transition-colors border border-white/5"
-            >
-              <Settings size={20} className="text-[#f0edf1]/80" />
-            </button>
-          </div>
-            <button className="p-2 hover:bg-white/5 rounded-full md:hidden">
-              <Menu size={20} />
-            </button>
+              <button
+                onClick={() => setIsCameraOpen(true)}
+                className="p-2.5 sm:px-6 sm:py-3 glass-surface hover:bg-white/10 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 text-[#d095ff] glow-purple hover:glow-purple-strong shadow-lg border border-[#d095ff]/20"
+              >
+                <Camera size={18} />
+                <span className="hidden sm:inline tracking-wide">Escanear</span>
+              </button>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="p-2.5 glass-surface hover:bg-white/10 rounded-full transition-colors border border-white/5"
+              >
+                <Settings size={20} className="text-[#f0edf1]/80" />
+              </button>
+            </div>
           </div>
         </div>
       </header>
