@@ -97,42 +97,55 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
     try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      const context = canvas.getContext('2d');
+      const context = canvas.getContext('2d', { willReadFrequently: true });
       
       if (!context) return;
 
-      // Define the crop area precisely for the title bar
-      const scanWidth = video.videoWidth * 0.8;
-      // The title bar is roughly 8% of the height
-      const scanHeight = video.videoHeight * 0.08;
-      const scanX = (video.videoWidth - scanWidth) / 2;
-      const scanY = video.videoHeight * 0.1; // Top 10% where the overlay starts
+      // 1. Full Context Capture for Gemini (good for Moiré anti-aliasing and context)
+      // Capturing a large portion (80% width, 60% height) instead of just the title
+      const fullWidth = video.videoWidth * 0.8;
+      const fullHeight = video.videoHeight * 0.6;
+      const fullX = (video.videoWidth - fullWidth) / 2;
+      const fullY = video.videoHeight * 0.1;
 
-      canvas.width = scanWidth;
-      canvas.height = scanHeight;
+      canvas.width = fullWidth;
+      canvas.height = fullHeight;
+      context.filter = 'none'; // No filters to avoid breaking Gemini's visual recognition on LCD screens
+      context.drawImage(video, fullX, fullY, fullWidth, fullHeight, 0, 0, fullWidth, fullHeight);
       
-      // Apply filters for better OCR readability
-      context.filter = 'grayscale(100%) contrast(150%) brightness(120%)';
-      context.drawImage(
-        video, 
-        scanX, scanY, scanWidth, scanHeight,
-        0, 0, scanWidth, scanHeight
-      );
-      // Reset filter
-      context.filter = 'none';
+      const fullBase64Image = canvas.toDataURL('image/jpeg', 0.8);
 
-      const base64Image = canvas.toDataURL('image/jpeg', 0.8);
+      // 2. Title Bar Capture for Tesseract OCR Fallback
+      const titleWidth = video.videoWidth * 0.8;
+      const titleHeight = video.videoHeight * 0.08;
+      const titleX = (video.videoWidth - titleWidth) / 2;
+      const titleY = video.videoHeight * 0.1;
+
+      // Temporary canvas just for the OCR crop
+      const ocrCanvas = document.createElement('canvas');
+      ocrCanvas.width = titleWidth;
+      ocrCanvas.height = titleHeight;
+      const ocrContext = ocrCanvas.getContext('2d', { willReadFrequently: true });
+      
+      if (ocrContext) {
+        // Less destructive contrast for notebook screens (LCDs)
+        ocrContext.filter = 'grayscale(100%) contrast(120%) brightness(110%) blur(0.5px)';
+        ocrContext.drawImage(video, titleX, titleY, titleWidth, titleHeight, 0, 0, titleWidth, titleHeight);
+      }
+      
+      const titleBarBase64Image = ocrCanvas.toDataURL('image/jpeg', 0.9);
       
       let cardName: string | null = null;
       
       try {
-        cardName = await identifyCardFromImage(base64Image);
+        // Feed the full contextual image to Gemini so it can read screen pixels properly
+        cardName = await identifyCardFromImage(fullBase64Image);
       } catch (geminiError: any) {
         console.warn("Gemini failed, switching to OCR mode:", geminiError.message);
         setOcrMode(true);
         
-        // Fallback to local OCR
-        cardName = await performLocalOCR(base64Image);
+        // Fallback to local OCR with the optimized title bar slice
+        cardName = await performLocalOCR(titleBarBase64Image);
       }
 
       if (cardName) {
