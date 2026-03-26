@@ -1,8 +1,8 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Scan, Loader2, CheckCircle2, AlertCircle, ScanLine } from 'lucide-react';
+import { X, ScanLine, Loader2, CheckCircle2, AlertCircle } from 'lucide-react';
 import { scryfall } from '../lib/scryfall';
-import Tesseract from 'tesseract.js';
+import { identifyCardFromImage } from '../lib/gemini';
 
 interface LiveScannerProps {
   isOpen: boolean;
@@ -13,19 +13,17 @@ interface LiveScannerProps {
 export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDetected }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const workerRef = useRef<Tesseract.Worker | null>(null);
   const loopRef = useRef<NodeJS.Timeout | null>(null);
   const isProcessingRef = useRef(false);
 
   const [stream, setStream] = useState<MediaStream | null>(null);
-  const [isEngineReady, setIsEngineReady] = useState(false);
   const [feedback, setFeedback] = useState<{ text: string; type: 'success' | 'info' | 'error' } | null>(null);
   const [scannedCards, setScannedCards] = useState<string[]>([]);
+  const [visionMode] = useState<boolean>(true); // Motor AI Ativo
 
   useEffect(() => {
     if (isOpen) {
-      setFeedback({ text: 'Iniciando Motor de Visão...', type: 'info' });
-      initWorker();
+      setFeedback({ text: 'Iniciando A.I. Vision...', type: 'info' });
       startCamera();
     } else {
       shutdown();
@@ -33,27 +31,11 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
     return () => shutdown();
   }, [isOpen]);
 
-  const initWorker = async () => {
-    try {
-      if (!workerRef.current) {
-        workerRef.current = await Tesseract.createWorker('eng');
-        await workerRef.current.setParameters({
-          tessedit_char_whitelist: "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 ',-"
-        });
-      }
-      setIsEngineReady(true);
-      setFeedback({ text: 'Aponte a mira para o TÍTULO da carta', type: 'info' });
-    } catch (err) {
-      console.error("Worker error:", err);
-      setFeedback({ text: 'Erro ao iniciar OCR Offline', type: 'error' });
-    }
-  };
-
   const startCamera = async () => {
     try {
       const constraints = {
         video: {
-          facingMode: 'environment', // Triggers rear camera on phones
+          facingMode: 'environment',
           width: { ideal: 1280 },
           height: { ideal: 720 }
         }
@@ -63,6 +45,7 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
       if (videoRef.current) {
         videoRef.current.srcObject = newStream;
       }
+      setFeedback({ text: 'Exiba a carta inteira na Câmera', type: 'info' });
     } catch (err) {
       console.error("Camera error:", err);
       setFeedback({ text: 'Permissão de câmera negada', type: 'error' });
@@ -75,35 +58,38 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
       stream.getTracks().forEach(track => track.stop());
       setStream(null);
     }
-    setIsEngineReady(false);
     setScannedCards([]);
     setFeedback(null);
     isProcessingRef.current = false;
   };
 
-  // The Continuous Scanning Loop
+  // Loop of vision processing. We use a slower interval (3s) to not burn the Gemini Free API limit (15 RPM)
+  // while still giving a decent "Real-Time / Live" scan feel.
   useEffect(() => {
-    if (isOpen && isEngineReady && stream) {
-      loopRef.current = setInterval(processFrame, 1000); // Process 1 frame every second
+    if (isOpen && stream) {
+      // Clear any previous interval
+      if (loopRef.current) clearInterval(loopRef.current);
+      
+      // We will loop every 3.5 seconds
+      loopRef.current = setInterval(processFrame, 3500); 
+      // Call first tick manually a slightly faster
+      setTimeout(processFrame, 1000);
     }
     return () => {
       if (loopRef.current) clearInterval(loopRef.current);
     };
-  }, [isOpen, isEngineReady, stream]);
+  }, [isOpen, stream]);
 
   const processFrame = async () => {
-    if (!videoRef.current || !canvasRef.current || !workerRef.current || isProcessingRef.current) return;
+    if (!videoRef.current || !canvasRef.current || isProcessingRef.current) return;
     isProcessingRef.current = true;
 
     try {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      const ctx = canvas.getContext('2d', { willReadFrequently: true });
+      const ctx = canvas.getContext('2d');
       if (!ctx) return;
 
-      // Extract only the top title bar area to OCR
-      // Let's assume the alignment reticle targets the upper 20% of the screen horizontally
-      // Video might be 1280x720. The target is a wide rectangle in the middle-top.
       const vW = video.videoWidth;
       const vH = video.videoHeight;
       if (vW === 0 || vH === 0) {
@@ -111,66 +97,56 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
         return;
       }
 
-      // We slice a rectangle covering 80% of width and 15% of height, positioned at Y=20%
-      const cropX = vW * 0.1;
-      const cropY = vH * 0.2;
-      const cropW = vW * 0.8;
-      const cropH = vH * 0.2;
+      // We downscale to 640xH to save API Bandwidth and speed up transmission to Gemini
+      canvas.width = 640;
+      canvas.height = (640 / vW) * vH;
 
-      canvas.width = cropW;
-      canvas.height = cropH;
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const base64 = canvas.toDataURL('image/jpeg', 0.8);
 
-      // Draw and apply Anti-Moiré + High Contrast Threshold
-      ctx.imageSmoothingEnabled = true;
-      ctx.imageSmoothingQuality = 'high';
-      ctx.filter = 'grayscale(100%) blur(1.5px) contrast(350%) brightness(140%)';
-      ctx.drawImage(video, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+      // AI Vision API
+      const resultName = await identifyCardFromImage(base64);
 
-      const base64 = canvas.toDataURL('image/png');
-
-      // 1. Local Browser OCR Array
-      const { data: { text } } = await workerRef.current.recognize(base64);
-      const cleaned = text.split('\n').map(l => l.trim()).filter(l => l.length > 3)[0];
-      
-      if (cleaned) {
-        // 2. Validate with Scryfall (Fuzzy or Autocomplete)
-        let matchedName: string | null = null;
+      if (resultName) {
+        // Validate with scryfall just to be absolutely sure the name is real
+        let finalCardName: string | null = null;
         try {
-          const names = await scryfall.getAutocomplete(cleaned);
+          const names = await scryfall.getAutocomplete(resultName);
           if (names.length > 0) {
-            matchedName = names[0];
+            finalCardName = names[0];
           } else {
-            const fuzzyRes = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(cleaned)}`);
+            const fuzzyRes = await fetch(`https://api.scryfall.com/cards/named?fuzzy=${encodeURIComponent(resultName)}`);
             if (fuzzyRes.ok) {
               const cardData = await fuzzyRes.json();
-              matchedName = cardData.name;
+              finalCardName = cardData.name;
             }
           }
         } catch (e) {
-          // Ignore network errs on rapid loop
+             finalCardName = resultName; // Trust Gemini if Scryfall fails
         }
 
-        if (matchedName) {
-          // SUCCESS!
-          if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback like Native apps
-          setFeedback({ text: `${matchedName} Detectado!`, type: 'success' });
+        if (finalCardName) {
+          if (navigator.vibrate) navigator.vibrate([50, 100, 50]); // Sucesso haptic!
+          setFeedback({ text: `${finalCardName} Identificado!`, type: 'success' });
           
           setScannedCards(prev => {
-            if (!prev.includes(matchedName!)) {
-              return [matchedName!, ...prev].slice(0, 5); // Keep last 5 history visible
+            if (!prev.includes(finalCardName!)) {
+              return [finalCardName!, ...prev].slice(0, 5); // Keep last 5 history visible
             }
             return prev;
           });
 
-          onDetected(matchedName); // Feed it forward to the parent 
+          onDetected(finalCardName);
           
-          // Pause execution for 1.5 seconds to let user look at success before firing again
-          await new Promise(r => setTimeout(r, 1500));
-          setFeedback({ text: 'Aponte a mira para o TÍTULO da carta', type: 'info' });
+          // Pausa extra para você ler o nome e trocar a carta fisicamente
+          await new Promise(r => setTimeout(r, 2000));
+          setFeedback({ text: 'Mande a próxima câmera inteira...', type: 'info' });
         }
       }
-    } catch (err) {
-      console.warn("Frame drop:", err);
+    } catch (err: any) {
+      if (err?.message === "GEMINI_QUOTA_EXCEEDED") {
+        setFeedback({ text: 'Limite API Alcançado. Segure a carta...', type: 'error' });
+      }
     } finally {
       isProcessingRef.current = false;
     }
@@ -191,8 +167,8 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
                 <ScanLine size={20} className="text-purple-400" />
               </div>
               <div>
-                <h3 className="text-lg font-display font-bold">Live Scanner</h3>
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Motor: Tesseract Local</p>
+                <h3 className="text-lg font-display font-bold">A.I. Vision</h3>
+                <p className="text-[10px] uppercase tracking-widest text-purple-400 font-bold animate-pulse">Scanning Full Art</p>
               </div>
             </div>
             <button 
@@ -208,72 +184,77 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
               ref={videoRef}
               autoPlay
               playsInline
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover filter contrast-125"
             />
             
-            {/* Dark Overlay with cutout for HUD */}
-            <div className="absolute inset-0 pointer-events-none bg-black/40 flex flex-col">
-              <div className="flex-[0.2]" />
-              <div className="flex justify-center flex-[0.2]">
-                {/* The "Reticle" that the user aligns the title with */}
-                <div className="w-[80%] h-full border-2 border-purple-500/80 rounded-lg relative bg-transparent shadow-[0_0_0_9999px_rgba(0,0,0,0.4)] flex items-center justify-center">
-                  {/* Corners */}
-                  <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-purple-500 rounded-tl-lg" />
-                  <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-purple-500 rounded-tr-lg" />
-                  <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-purple-500 rounded-bl-lg" />
-                  <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-purple-500 rounded-br-lg" />
-                  
-                  {isProcessingRef.current && (
-                    <div className="absolute bottom-0 left-0 h-0.5 bg-purple-500 animate-pulse w-full filter blur-sm"></div>
-                  )}
-                </div>
+            {/* Full Screen Scan Guides (Corner Brackets) */}
+            <div className="absolute inset-4 pointer-events-none flex flex-col outline-none">
+              <div className="flex-1 flex justify-between items-start">
+                  <div className="w-12 h-12 border-t-4 border-l-4 border-purple-500/50 rounded-tl-3xl opacity-50" />
+                  <div className="w-12 h-12 border-t-4 border-r-4 border-purple-500/50 rounded-tr-3xl opacity-50" />
               </div>
-              <div className="flex-[0.6] flex flex-col items-center justify-start pt-12">
-                
-                {/* Dynamic Feedback Center */}
+              <div className="flex-1 flex justify-between items-end">
+                  <div className="w-12 h-12 border-b-4 border-l-4 border-purple-500/50 rounded-bl-3xl opacity-50" />
+                  <div className="w-12 h-12 border-b-4 border-r-4 border-purple-500/50 rounded-br-3xl opacity-50" />
+              </div>
+            </div>
+
+            {/* Scanning Radar Scanline Overlay */}
+            {stream && (
+              <motion.div 
+                initial={{ top: '0%' }}
+                animate={{ top: '100%' }}
+                transition={{ duration: 3.5, ease: "linear", repeat: Infinity }}
+                className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-purple-500 to-transparent shadow-[0_0_20px_5px_rgba(168,85,247,0.4)] z-10"
+              />
+            )}
+
+            <div className="absolute inset-0 pointer-events-none flex flex-col justify-end pb-12 items-center z-20">
+              {/* Dynamic Feedback Center */}
+              <AnimatePresence mode="wait">
                 {feedback && (
                   <motion.div
                     key={feedback.text}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    className={`px-6 py-3 rounded-full flex items-center gap-3 backdrop-blur-md border ${
+                    exit={{ opacity: 0, y: -10 }}
+                    className={`px-8 py-4 mb-4 rounded-full flex items-center gap-3 backdrop-blur-xl border shadow-2xl ${
                       feedback.type === 'success' ? 'bg-green-500/20 border-green-500/50 text-green-300' :
                       feedback.type === 'error' ? 'bg-red-500/20 border-red-500/50 text-red-300' :
-                      'bg-white/10 border-white/20 text-white/80'
+                      'bg-purple-900/40 border-purple-500/40 text-purple-100'
                     }`}
                   >
-                    {feedback.type === 'success' && <CheckCircle2 size={18} />}
-                    {feedback.type === 'error' && <AlertCircle size={18} />}
-                    {!isEngineReady && feedback.type === 'info' && <Loader2 size={18} className="animate-spin" />}
-                    <span className="text-sm font-bold uppercase tracking-wider">{feedback.text}</span>
+                    {feedback.type === 'success' && <CheckCircle2 size={24} />}
+                    {feedback.type === 'error' && <AlertCircle size={24} />}
+                    {feedback.type === 'info' && <Loader2 size={24} className="animate-spin text-purple-400" />}
+                    <span className="text-sm font-black uppercase tracking-widest">{feedback.text}</span>
                   </motion.div>
                 )}
+              </AnimatePresence>
 
-                {/* Scanned History List */}
-                {scannedCards.length > 0 && (
-                  <div className="mt-8 w-full max-w-xs space-y-2">
-                    {scannedCards.map((card, i) => (
-                      <motion.div 
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        key={`${card}-${i}`}
-                        className={`px-4 py-3 rounded-xl border flex items-center justify-between ${
-                          i === 0 
-                            ? 'bg-purple-600/20 border-purple-500/50 text-white' 
-                            : 'bg-white/5 border-white/5 text-white/40'
-                        }`}
-                      >
-                        <span className="text-sm font-bold truncate">{card}</span>
-                        {i === 0 && <span className="text-[10px] uppercase font-black tracking-widest text-purple-400">Novo</span>}
-                      </motion.div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/* Scanned History List */}
+              {scannedCards.length > 0 && (
+                <div className="w-full max-w-sm space-y-2 px-6">
+                  {scannedCards.map((card, i) => (
+                    <motion.div 
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      key={`${card}-${i}`}
+                      className={`px-6 py-4 rounded-2xl border backdrop-blur-md flex items-center justify-between shadow-lg ${
+                        i === 0 
+                          ? 'bg-purple-600/30 border-purple-500/80 text-white' 
+                          : 'bg-black/60 border-white/5 text-white/40'
+                      }`}
+                    >
+                      <span className="text-sm font-bold truncate flex-1">{card}</span>
+                      {i === 0 && <span className="text-[10px] uppercase font-black tracking-widest px-3 py-1 bg-purple-500/20 rounded-lg text-purple-300 ml-2">Identificado</span>}
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
             
-            {/* Hidden Canvas for OCR processing */}
+            {/* Hidden Canvas for Vision sampling */}
             <canvas ref={canvasRef} className="hidden" />
           </div>
         </div>
