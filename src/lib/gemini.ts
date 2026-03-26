@@ -1,4 +1,37 @@
 import { db } from './db';
+import { storage } from './storage';
+
+const callGeminiDirectly = async (prompt: string, imageBase64?: string) => {
+  const apiKey = storage.getGeminiKey();
+  if (!apiKey) throw new Error("GEMINI_AUTH_ERROR");
+
+  const partText = { text: prompt };
+  const parts = imageBase64 
+    ? [partText, { inline_data: { mime_type: "image/jpeg", data: imageBase64 } }] 
+    : [partText];
+
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts }],
+      generationConfig: { temperature: 0.2 }
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'Gemini API Error');
+  }
+
+  const data = await response.json();
+  if (data.candidates && data.candidates.length > 0) {
+    return data.candidates[0].content.parts[0].text;
+  }
+  throw new Error("No content generated");
+};
 
 const translateText = async (text: string, target: string = 'pt') => {
   if (!text || text.trim() === "") return text;
@@ -21,19 +54,14 @@ export const translateMTG = async (text: string, type: 'keyword' | 'definition' 
   if (!text || text.trim() === "") return text;
 
   try {
-    const response = await fetch('/api/translate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, type })
-    });
+    const prompt = type === 'keyword' 
+      ? `Translate this Magic: The Gathering keyword to Portuguese (PT-BR) using the official Wizards of the Coast glossary. Return ONLY the translated keyword. Keyword: "${text}"`
+      : type === 'definition'
+        ? `Provide a concise definition in Portuguese (PT-BR) for the Magic: The Gathering keyword "${text}" using the official Wizards of the Coast glossary. Return ONLY the definition.`
+        : `Translate this Magic: The Gathering ${type} to Portuguese (PT-BR) using the official Wizards of the Coast glossary and terminology. Ensure technical terms like "battlefield", "graveyard", "scry", etc., are translated correctly. Return ONLY the translated text. Text: "${text}"`;
     
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Server error');
-    }
-    
-    const result = await response.json();
-    return result.translatedText || text;
+    const result = await callGeminiDirectly(prompt);
+    return result.trim() || text;
   } catch (error: any) {
     console.error("❌ Gemini API translation error:", error);
     console.log("🌐 Translation: Falling back to Google Translate due to error.");
@@ -43,19 +71,10 @@ export const translateMTG = async (text: string, type: 'keyword' | 'definition' 
 
 export const identifyCardFromImage = async (base64Image: string): Promise<string | null> => {
   try {
-    const response = await fetch('/api/identifyCard', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: base64Image.split(',')[1] || base64Image })
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Server error');
-    }
-
-    const result = await response.json();
-    const name = result.name;
+    const prompt = "Identify the exact English name of this Magic: The Gathering card. Return ONLY the absolute exact card name. If you cannot identify it, return 'unknown'.";
+    const result = await callGeminiDirectly(prompt, base64Image.split(',')[1] || base64Image);
+    const name = result.trim();
+    
     if (name && name.toLowerCase() !== 'unknown') {
       return name;
     }
@@ -66,7 +85,7 @@ export const identifyCardFromImage = async (base64Image: string): Promise<string
     if (errorMsg.includes("quota") || errorMsg.includes("429") || errorMsg.includes("limit")) {
       throw new Error("GEMINI_QUOTA_EXCEEDED");
     }
-    if (errorMsg.includes("key") || errorMsg.includes("401") || errorMsg.includes("403") || errorMsg.includes("gemini_not_configured")) {
+    if (errorMsg.includes("key") || errorMsg.includes("401") || errorMsg.includes("403") || errorMsg.includes("gemini_auth_error")) {
       throw new Error("GEMINI_AUTH_ERROR");
     }
     return null;
@@ -75,39 +94,38 @@ export const identifyCardFromImage = async (base64Image: string): Promise<string
 
 export const analyzeDeckStrategy = async (decklist: string, commander?: string): Promise<string | null> => {
   try {
-    const response = await fetch('/api/analyzeDeck', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ decklist, commander })
-    });
+    const prompt = `Como um expert e jogador profissional de Magic: The Gathering, analise a seguinte lista de deck. 
+${commander ? `O Comandante do deck é: ${commander}.` : ''}
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || 'Server error');
-    }
+Forneça um resumo estratégico profundo, mas direto e muito bem formatado em Markdown. Divida em três seções:
+1. **Estratégia Principal**: Qual é o plano de jogo e arquétipo geral?
+2. **Sinergias e Combos**: Destaque as interações entre peças chave da lista.
+3. **Condições de Vitória (Wincons)**: Como o deck finaliza o jogo?
 
-    const result = await response.json();
-    return result.strategy || null;
+Retorne sua análise inteiramente em Português do Brasil (PT-BR).
+
+Lista do Deck:
+${decklist}`;
+
+    const strategy = await callGeminiDirectly(prompt);
+    return strategy.trim();
   } catch (error: any) {
     console.error("Gemini Analyze Deck API error:", error);
-    return "Não foi possível gerar a estratégia de deck devido a um erro de comunicação com a Inteligência Artificial.";
+    return "Não foi possível gerar a estratégia de deck. Por favor, verifique se sua CHAVE DE API (Gemini Key) nas Configurações é válida e compatível com o Gemini 2.5 Flash.";
   }
 };
 
 export const translateToPTBR = async (text: string, type: 'keyword' | 'definition' | 'oracle' = 'oracle') => {
   if (!text || text.trim() === "") return text;
   
-  // Create a predictable ID hash for the text+type
-  const cacheKey = `${type}:${text.substring(0, 100)}`; // limit size of key
+  const cacheKey = `${type}:${text.substring(0, 100)}`;
   
   try {
     const cached = await db.translations.get(cacheKey);
     if (cached) {
       return cached.translatedText;
     }
-  } catch (e) {
-    // Dexie issue, ignore and proceed
-  }
+  } catch (e) {}
   
   const result = await translateMTG(text, type);
   
@@ -120,9 +138,7 @@ export const translateToPTBR = async (text: string, type: 'keyword' | 'definitio
         type: type,
         createdAt: Date.now()
       });
-    } catch (e) {
-      console.warn("Failed to cache translation in Dexie", e);
-    }
+    } catch (e) {}
   }
   
   return result;
@@ -130,14 +146,9 @@ export const translateToPTBR = async (text: string, type: 'keyword' | 'definitio
 
 export const translateRules = async (rules: string[]) => {
   if (!rules.length) return [];
-  
   try {
-    const translatedRules = await Promise.all(
-      rules.map(rule => translateToPTBR(rule, 'oracle'))
-    );
-    return translatedRules;
+    return await Promise.all(rules.map(rule => translateToPTBR(rule, 'oracle')));
   } catch (error: any) {
-    console.error("Rules translation error:", error);
     return rules;
   }
 };
