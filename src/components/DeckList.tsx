@@ -100,29 +100,29 @@ export const DeckList: React.FC<DeckListProps> = ({ onSelectDeck }) => {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h2 className="text-3xl font-display font-bold tracking-tight">Meus Decks</h2>
-          <div className="flex items-center gap-3 mt-1">
-            <p className="text-white/40 text-sm font-mono uppercase tracking-widest">Deck Vault & Offline Storage</p>
+          <div className="flex flex-wrap items-center gap-3 mt-1">
+            <p className="text-white/40 text-sm font-mono uppercase tracking-widest break-words">Deck Vault & Offline Storage</p>
             {syncStatus?.status === 'idle' && (
-              <span className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded-md text-[8px] font-black uppercase tracking-widest">
+              <span className="flex items-center gap-1.5 px-2 py-0.5 bg-green-500/10 text-green-400 border border-green-500/20 rounded-md text-[8px] font-black uppercase tracking-widest whitespace-nowrap">
                 <Database size={10} /> {syncStatus.totalCards.toLocaleString()} Cartas Offline
               </span>
             )}
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row w-full md:w-auto gap-3">
           <button
             onClick={() => setShowSync(true)}
-            className="flex items-center gap-2 px-4 py-3 bg-white/5 text-white/60 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all active:scale-95 border border-white/10"
+            className="flex items-center justify-center sm:justify-start gap-2 px-4 py-3 bg-white/5 text-white/60 rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-white/10 hover:text-white transition-all active:scale-95 border border-white/10 w-full md:w-auto"
           >
             <RefreshCw size={16} className={cn(syncStatus?.status === 'syncing' && "animate-spin")} /> 
             {syncStatus?.status === 'syncing' ? "Sincronizando..." : "Sincronizar"}
           </button>
           <button
             onClick={() => setIsCreating(true)}
-            className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-purple-500 hover:text-white transition-all active:scale-95 shadow-lg shadow-white/5"
+            className="flex items-center justify-center sm:justify-start gap-2 px-6 py-3 bg-[#d095ff] text-[#38005e] rounded-2xl font-bold text-xs uppercase tracking-widest hover:bg-[#c782ff] transition-all active:scale-95 shadow-lg w-full md:w-auto"
           >
             <Plus size={16} /> Novo Deck
           </button>
@@ -169,17 +169,17 @@ export const DeckList: React.FC<DeckListProps> = ({ onSelectDeck }) => {
                   </select>
                 </div>
               </div>
-              <div className="flex gap-3 justify-end">
+              <div className="flex flex-col-reverse sm:flex-row gap-3 sm:justify-end mt-4">
                 <button
                   type="button"
                   onClick={() => setIsCreating(false)}
-                  className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                  className="px-6 py-3 text-xs font-bold uppercase tracking-widest text-[#f0edf1]/40 hover:text-[#f0edf1] transition-colors w-full sm:w-auto text-center"
                 >
                   Cancelar
                 </button>
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-purple-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-purple-500 transition-all shadow-lg shadow-purple-600/20"
+                  className="px-8 py-3 bg-[#d095ff] text-[#38005e] rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#c782ff] transition-all shadow-[0_0_20px_rgba(208,149,255,0.2)] w-full sm:w-auto text-center"
                 >
                   Criar Deck
                 </button>
