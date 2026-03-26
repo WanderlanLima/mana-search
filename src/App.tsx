@@ -139,13 +139,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030303] text-white selection:bg-purple-500/30">
+    <div className="min-h-screen bg-[#0e0e11] text-[#f0edf1] selection:bg-[#d095ff]/30 font-sans">
       {/* Background Effects */}
       <div className="atmosphere" />
       
       {/* Header */}
-      <header className="sticky top-0 z-40 glass-surface border-b border-white/5">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 glass-surface border-b border-white/5 shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+        <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
           <div 
             className="flex items-center gap-3 cursor-pointer select-none active:scale-95 transition-transform"
             onClick={handleNightmareClick}
@@ -187,20 +187,21 @@ export default function App() {
                 Decks
               </button>
             </nav>
-            <button 
-              onClick={() => setIsNightmareOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 bg-purple-500/10 hover:bg-purple-500/20 border border-purple-500/20 rounded-full transition-all group"
+            <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsCameraOpen(true)}
+              className="p-3 sm:px-6 sm:py-3 glass-surface hover:bg-white/10 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 text-[#d095ff] glow-purple hover:glow-purple-strong shadow-lg border border-[#d095ff]/20"
             >
-              <Ghost size={14} className="text-purple-400 group-hover:scale-110 transition-transform" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-purple-400">Status</span>
+              <Camera size={18} />
+              <span className="hidden sm:inline tracking-wide">Escanear</span>
             </button>
-            <button 
+            <button
               onClick={() => setIsSettingsOpen(true)}
-              className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-colors"
-              title="Configurações"
+              className="p-3 glass-surface hover:bg-white/10 rounded-full transition-colors border border-white/5"
             >
-              <Settings size={20} />
+              <Settings size={20} className="text-[#f0edf1]/80" />
             </button>
+          </div>
             <button className="p-2 hover:bg-white/5 rounded-full md:hidden">
               <Menu size={20} />
             </button>
