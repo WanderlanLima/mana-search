@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Camera, Loader2, Sparkles, Scan, AlertCircle } from 'lucide-react';
+import { X, Camera, Loader2, Sparkles, Scan, AlertCircle, Highlighter, RotateCcw, Check } from 'lucide-react';
 import { identifyCardFromImage } from '../lib/gemini';
 import { storage } from '../lib/storage';
 import { cn } from '../lib/utils';
@@ -22,10 +22,17 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
   const [hasKey, setHasKey] = useState(false);
   const [ocrMode, setOcrMode] = useState(false);
 
+  // Highlighter Feature States
+  const [frozenImage, setFrozenImage] = useState<string | null>(null);
+  const drawingCanvasRef = useRef<HTMLCanvasElement>(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [boundingBox, setBoundingBox] = useState<{ minX: number, minY: number, maxX: number, maxY: number } | null>(null);
+
   useEffect(() => {
     if (isOpen) {
       setHasKey(!!storage.getGeminiKey());
       setOcrMode(false);
+      resetScanner();
       startCamera();
     } else {
       stopCamera();
@@ -33,9 +40,16 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
     return () => stopCamera();
   }, [isOpen]);
 
+  const resetScanner = () => {
+    setFrozenImage(null);
+    setBoundingBox(null);
+    setError(null);
+    setIsDrawing(false);
+  };
+
   const startCamera = async () => {
     try {
-      setError(null);
+      resetScanner();
       const constraints = {
         video: {
           facingMode: 'environment',
@@ -61,12 +75,101 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
     }
   };
 
+  // Step 1: Capture full view for drawing
+  const captureImageForHighlighter = () => {
+    if (!videoRef.current || !canvasRef.current) return;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    
+    // Store full intrinsic resolution
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return;
+    
+    // Draw full frame
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    
+    setFrozenImage(canvas.toDataURL('image/jpeg', 0.9));
+  };
+
+  // Setup drawing canvas size on freeze
+  useEffect(() => {
+    if (frozenImage && drawingCanvasRef.current) {
+      const container = drawingCanvasRef.current.parentElement;
+      if (container) {
+        drawingCanvasRef.current.width = container.clientWidth;
+        drawingCanvasRef.current.height = container.clientHeight;
+      }
+    }
+  }, [frozenImage]);
+
+  // Handle Drawing
+  const getPos = (e: any, canvas: HTMLCanvasElement) => {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  };
+
+  const startDrawing = (e: any) => {
+    setIsDrawing(true);
+    const canvas = drawingCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const pos = getPos(e, canvas);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+    
+    // Set line styles for highlighter loop
+    ctx.lineCap = 'round';
+    ctx.lineJoin = 'round';
+    ctx.lineWidth = 35;
+    ctx.strokeStyle = 'rgba(234, 179, 8, 0.4)'; // Transparent yellow
+    
+    if (!boundingBox) {
+      setBoundingBox({ minX: pos.x, minY: pos.y, maxX: pos.x, maxY: pos.y });
+    }
+  };
+
+  const draw = (e: any) => {
+    if (!isDrawing) return;
+    const canvas = drawingCanvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    const pos = getPos(e, canvas);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+    
+    setBoundingBox(prev => {
+      if (!prev) return { minX: pos.x, minY: pos.y, maxX: pos.x, maxY: pos.y };
+      return {
+        minX: Math.min(prev.minX, pos.x),
+        minY: Math.min(prev.minY, pos.y),
+        maxX: Math.max(prev.maxX, pos.x),
+        maxY: Math.max(prev.maxY, pos.y)
+      };
+    });
+  };
+
+  const stopDrawing = () => {
+    setIsDrawing(false);
+  };
+
   const performLocalOCR = async (image: string): Promise<string | null> => {
     try {
       const { data: { text } } = await Tesseract.recognize(image, 'eng');
-      // Clean the text: take the first line and remove non-alphanumeric chars at start/end
-      const firstLine = text.split('\n')[0].trim().replace(/[^a-zA-Z0-9 ',-]/g, '');
-      if (firstLine.length > 3) {
+      // Assume the text might have newlines or noise, take first non-empty line
+      const lines = text.split('\n').map(l => l.trim().replace(/[^a-zA-Z0-9 ',-]/g, '')).filter(l => l.length > 2);
+      if (lines.length > 0) {
+        const firstLine = lines[0];
         try {
           const names = await scryfall.getAutocomplete(firstLine);
           if (names.length > 0) return names[0];
@@ -88,78 +191,93 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
     }
   };
 
-  const captureAndIdentify = async () => {
-    if (!videoRef.current || !canvasRef.current || isCapturing) return;
-    
+  // Step 2: Read only the highlighted area
+  const identifyHighlightedText = async () => {
+    if (!frozenImage || !boundingBox || isCapturing) return;
     setIsCapturing(true);
     setError(null);
 
     try {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      const context = canvas.getContext('2d', { willReadFrequently: true });
+      const canvasDisplay = drawingCanvasRef.current;
+      const originalCanvas = canvasRef.current;
+      if (!canvasDisplay || !originalCanvas) return;
+
+      const originalWidth = originalCanvas.width;
+      const originalHeight = originalCanvas.height;
+      const displayWidth = canvasDisplay.width;
+      const displayHeight = canvasDisplay.height;
       
-      if (!context) return;
-
-      // 1. Full Context Capture for Gemini (good for Moiré anti-aliasing and context)
-      // Capturing a large portion (80% width, 60% height) instead of just the title
-      const fullWidth = video.videoWidth * 0.8;
-      const fullHeight = video.videoHeight * 0.6;
-      const fullX = (video.videoWidth - fullWidth) / 2;
-      const fullY = video.videoHeight * 0.1;
-
-      canvas.width = fullWidth;
-      canvas.height = fullHeight;
-      context.filter = 'none'; // No filters to avoid breaking Gemini's visual recognition on LCD screens
-      context.drawImage(video, fullX, fullY, fullWidth, fullHeight, 0, 0, fullWidth, fullHeight);
+      const srcRatio = originalWidth / originalHeight;
+      const dstRatio = displayWidth / displayHeight;
       
-      const fullBase64Image = canvas.toDataURL('image/jpeg', 0.8);
-
-      // 2. Title Bar Capture for Tesseract OCR Fallback
-      const titleWidth = video.videoWidth * 0.8;
-      const titleHeight = video.videoHeight * 0.08;
-      const titleX = (video.videoWidth - titleWidth) / 2;
-      const titleY = video.videoHeight * 0.1;
-
-      // Temporary canvas just for the OCR crop
-      const ocrCanvas = document.createElement('canvas');
-      ocrCanvas.width = titleWidth;
-      ocrCanvas.height = titleHeight;
-      const ocrContext = ocrCanvas.getContext('2d', { willReadFrequently: true });
+      let scale;
+      let offsetX = 0;
+      let offsetY = 0;
       
-      if (ocrContext) {
-        // Less destructive contrast for notebook screens (LCDs)
-        ocrContext.filter = 'grayscale(100%) contrast(120%) brightness(110%) blur(0.5px)';
-        ocrContext.drawImage(video, titleX, titleY, titleWidth, titleHeight, 0, 0, titleWidth, titleHeight);
+      if (dstRatio > srcRatio) {
+        scale = displayWidth / originalWidth;
+        offsetY = (displayHeight - (originalHeight * scale)) / 2;
+      } else {
+        scale = displayHeight / originalHeight;
+        offsetX = (displayWidth - (originalWidth * scale)) / 2;
       }
       
-      const titleBarBase64Image = ocrCanvas.toDataURL('image/jpeg', 0.9);
+      const padding = 20; // Visual padding
+      const vizX = Math.max(0, boundingBox.minX - padding);
+      const vizY = Math.max(0, boundingBox.minY - padding);
+      const vizW = boundingBox.maxX - boundingBox.minX + padding * 2;
+      const vizH = boundingBox.maxY - boundingBox.minY + padding * 2;
       
+      // Map to original coordinates
+      const sx = (vizX - offsetX) / scale;
+      const sy = (vizY - offsetY) / scale;
+      const sWidth = vizW / scale;
+      const sHeight = vizH / scale;
+      
+      const finalSx = Math.max(0, sx);
+      const finalSy = Math.max(0, sy);
+      const finalSWidth = Math.min(originalWidth - finalSx, sWidth);
+      const finalSHeight = Math.min(originalHeight - finalSy, sHeight);
+
+      // Create cropped image
+      const cropCanvas = document.createElement('canvas');
+      cropCanvas.width = finalSWidth;
+      cropCanvas.height = finalSHeight;
+      const ctx = cropCanvas.getContext('2d');
+      if (!ctx) return;
+
+      // Ensure good contrast for OCR
+      ctx.filter = 'contrast(120%) brightness(110%)';
+      ctx.drawImage(originalCanvas, finalSx, finalSy, finalSWidth, finalSHeight, 0, 0, finalSWidth, finalSHeight);
+      
+      const croppedBase64 = cropCanvas.toDataURL('image/jpeg', 0.9);
+
       let cardName: string | null = null;
-      
       try {
-        // Feed the full contextual image to Gemini so it can read screen pixels properly
-        cardName = await identifyCardFromImage(fullBase64Image);
+        cardName = await identifyCardFromImage(croppedBase64);
       } catch (geminiError: any) {
         console.warn("Gemini failed, switching to OCR mode:", geminiError.message);
         setOcrMode(true);
-        
-        // Fallback to local OCR with the optimized title bar slice
-        cardName = await performLocalOCR(titleBarBase64Image);
+        cardName = await performLocalOCR(croppedBase64);
       }
 
       if (cardName) {
         onDetected(cardName);
-        onClose();
+        handleClose();
       } else {
-        setError("Não consegui identificar a carta. Tente focar melhor no nome.");
+        setError("Não consegui ler o texto em destaque. Tente iluminar melhor ou destacar novamente.");
       }
     } catch (err) {
-      console.error("Capture error:", err);
-      setError("Erro ao processar imagem.");
+      console.error("Highlight OCR error:", err);
+      setError("Erro ao processar o recorte.");
     } finally {
       setIsCapturing(false);
     }
+  };
+
+  const handleClose = () => {
+    resetScanner();
+    onClose();
   };
 
   return (
@@ -167,40 +285,52 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
       {isOpen && (
         <div className="fixed inset-0 z-[150] bg-black flex flex-col">
           {/* Header */}
-          <div className="absolute top-0 left-0 right-0 z-10 p-6 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent">
+          <div className="absolute top-0 left-0 right-0 z-10 p-6 flex items-center justify-between bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-purple-600/20 rounded-xl flex items-center justify-center">
                 <Scan size={20} className="text-purple-400" />
               </div>
               <div>
                 <h3 className="text-lg font-display font-bold">Mana Vision</h3>
-                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Scanner de Cartas</p>
+                <p className="text-[10px] uppercase tracking-widest text-white/40 font-bold">Scanner Interativo</p>
               </div>
             </div>
             <button 
-              onClick={onClose}
-              className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors"
+              onClick={handleClose}
+              className="p-3 bg-white/5 hover:bg-white/10 rounded-full transition-colors pointer-events-auto"
             >
               <X size={24} />
             </button>
           </div>
 
-          {/* Camera View */}
-          <div className="flex-1 relative overflow-hidden">
+          {/* Viewport */}
+          <div className="flex-1 relative overflow-hidden bg-[#0A0A0A]">
             {error ? (
-              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center gap-6">
+              <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center gap-6 z-20 bg-black/50 backdrop-blur-sm">
                 <div className="w-16 h-16 bg-red-500/10 rounded-2xl flex items-center justify-center text-red-400">
                   <AlertCircle size={32} />
                 </div>
                 <p className="text-white/60 text-sm max-w-xs leading-relaxed">{error}</p>
-                <button 
-                  onClick={startCamera}
-                  className="px-6 py-3 bg-white text-black rounded-xl font-bold text-sm"
-                >
-                  Tentar Novamente
-                </button>
+                <div className="flex gap-4">
+                  <button 
+                    onClick={resetScanner}
+                    className="px-6 py-3 bg-white/10 text-white rounded-xl font-bold text-sm"
+                  >
+                    Repetir Foto
+                  </button>
+                  {frozenImage && boundingBox && (
+                    <button 
+                      onClick={identifyHighlightedText}
+                      className="px-6 py-3 bg-purple-600 text-white rounded-xl font-bold text-sm"
+                    >
+                      Tentar Leitura
+                    </button>
+                  )}
+                </div>
               </div>
-            ) : (
+            ) : null}
+
+            {!frozenImage ? (
               <>
                 <video 
                   ref={videoRef}
@@ -210,7 +340,7 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
                 />
                 
                 {/* Scanner Overlay */}
-                <div className="absolute inset-0 flex flex-col items-center">
+                <div className="absolute inset-0 flex flex-col items-center pointer-events-none">
                   <div className="mt-[15vh] w-[85%] aspect-[3/1] border-2 border-purple-500/50 rounded-2xl relative">
                     {/* Corners */}
                     <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-purple-500 rounded-tl-lg" />
@@ -218,64 +348,106 @@ export const CameraScanner: React.FC<CameraScannerProps> = ({ isOpen, onClose, o
                     <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-purple-500 rounded-bl-lg" />
                     <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-purple-500 rounded-br-lg" />
                     
-                    {/* Scanning Line */}
-                    <motion.div 
-                      animate={{ top: ['0%', '100%', '0%'] }}
-                      transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                      className="absolute left-0 right-0 h-0.5 bg-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.5)] z-10"
-                    />
-                    
                     <div className="absolute -bottom-12 left-0 right-0 text-center">
-                      <p className="text-[10px] uppercase tracking-[0.3em] text-purple-400 font-black drop-shadow-lg">
-                        Alinhe o nome da carta aqui
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-white/80 font-black drop-shadow-lg">
+                        Enquadre o texto que deseja ler
                       </p>
                     </div>
                   </div>
                 </div>
               </>
+            ) : (
+              <div className="relative w-full h-full flex items-center justify-center bg-black">
+                {/* Frozen Image */}
+                <img 
+                  src={frozenImage} 
+                  className="w-full h-full object-cover select-none pointer-events-none" 
+                  alt="Captured"
+                />
+                
+                <div className="absolute inset-x-0 top-32 flex justify-center pointer-events-none">
+                  <div className="bg-black/60 backdrop-blur-md border border-white/10 px-4 py-2 rounded-full flex items-center gap-2 animate-pulse">
+                    <Highlighter size={16} className="text-yellow-400" />
+                    <span className="text-white text-xs font-bold uppercase tracking-wider">
+                      Pinte o nome da carta
+                    </span>
+                  </div>
+                </div>
+
+                {/* Drawing Surface */}
+                <canvas 
+                  ref={drawingCanvasRef}
+                  className="absolute inset-0 w-full h-full touch-none cursor-crosshair z-10"
+                  onMouseDown={startDrawing}
+                  onMouseMove={draw}
+                  onMouseUp={stopDrawing}
+                  onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawing}
+                  onTouchMove={draw}
+                  onTouchEnd={stopDrawing}
+                />
+              </div>
             )}
           </div>
 
-          {/* Controls */}
-          <div className="p-10 bg-gradient-to-t from-black to-transparent flex flex-col items-center gap-6">
+          {/* Bottom Actions */}
+          <div className="p-8 pb-12 bg-black flex flex-col items-center gap-6 z-20">
             {ocrMode && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-full flex items-center gap-2 text-amber-400 text-[10px] font-bold uppercase tracking-widest mb-2"
-              >
+              <div className="px-4 py-2 bg-amber-500/20 border border-amber-500/30 rounded-full flex items-center gap-2 text-amber-400 text-[10px] font-bold uppercase tracking-widest mb-2">
                 <AlertCircle size={14} />
-                Modo OCR Ativo (Gemini Indisponível)
-              </motion.div>
+                Modo OCR Tesseract (Gemini Indisponível)
+              </div>
             )}
             
-            <button
-              onClick={captureAndIdentify}
-              disabled={isCapturing || !!error}
-              className={cn(
-                "w-20 h-20 rounded-full flex items-center justify-center transition-all active:scale-90 relative",
-                isCapturing ? "bg-white/10" : "bg-white"
-              )}
-            >
-              {isCapturing ? (
-                <Loader2 size={32} className="animate-spin text-purple-500" />
-              ) : (
-                <Camera size={32} className="text-black" />
-              )}
-              
-              {/* Outer Ring */}
-              <div className="absolute -inset-2 border-2 border-white/20 rounded-full" />
-            </button>
-            
-            <div className="flex items-center gap-2 text-white/40">
-              <Sparkles size={14} />
-              <p className="text-[10px] uppercase tracking-widest font-bold">
-                {ocrMode ? "Processamento Local (Tesseract)" : "Powered by Gemini Vision"}
-              </p>
-            </div>
+            {!frozenImage ? (
+              // Capture State
+              <div className="flex flex-col items-center">
+                <button
+                  onClick={captureImageForHighlighter}
+                  disabled={isCapturing}
+                  className="w-20 h-20 rounded-full bg-white flex items-center justify-center transition-all active:scale-90 relative"
+                >
+                  <Camera size={32} className="text-black" />
+                  <div className="absolute -inset-2 border-2 border-white/20 rounded-full" />
+                </button>
+                <div className="mt-6 flex items-center gap-2 text-white/40">
+                  <Sparkles size={14} />
+                  <p className="text-[10px] uppercase tracking-widest font-bold">
+                    Powered by Gemini Vision
+                  </p>
+                </div>
+              </div>
+            ) : (
+              // Highlight State
+              <div className="w-full max-w-sm flex items-center justify-between gap-4">
+                <button
+                  onClick={resetScanner}
+                  disabled={isCapturing}
+                  className="flex-1 py-4 bg-white/10 hover:bg-white/20 rounded-2xl flex items-center justify-center gap-2 text-white transition-all active:scale-95 text-sm font-bold"
+                >
+                  <RotateCcw size={18} />
+                  Voltar
+                </button>
+
+                <button
+                  onClick={identifyHighlightedText}
+                  disabled={isCapturing || !boundingBox}
+                  className={cn(
+                    "flex-1 py-4 rounded-2xl flex items-center justify-center gap-2 text-white transition-all active:scale-95 text-sm font-bold",
+                    !boundingBox ? "bg-purple-600/50 opacity-50 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-500 shadow-[0_0_20px_rgba(147,51,234,0.4)]"
+                  )}
+                >
+                  {isCapturing ? (
+                    <Loader2 size={18} className="animate-spin" />
+                  ) : (
+                    <Check size={18} />
+                  )}
+                  {isCapturing ? "Lendo..." : "Ler Texto"}
+                </button>
+              </div>
+            )}
           </div>
 
-          {/* Hidden Canvas for Processing */}
           <canvas ref={canvasRef} className="hidden" />
         </div>
       )}
