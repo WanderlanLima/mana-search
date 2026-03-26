@@ -114,11 +114,11 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
           </div>
         </div>
 
-        <div className="flex items-center gap-3 p-1 bg-white/5 rounded-2xl w-fit">
+        <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 p-1 bg-white/5 rounded-2xl w-full md:w-fit">
           <button
             onClick={handleCopyList}
             className={cn(
-              "px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2",
+              "flex-1 md:flex-none justify-center px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 min-w-[130px]",
               copied ? "bg-green-500 text-white" : "text-white/40 hover:text-white hover:bg-white/5"
             )}
           >
@@ -127,15 +127,15 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
           </button>
           <button
             onClick={() => setShowImport(true)}
-            className="px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 text-white/40 hover:text-white hover:bg-white/5"
+            className="flex-1 md:flex-none justify-center px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 text-white/40 hover:text-white hover:bg-white/5 min-w-[130px]"
           >
             <FileUp size={14} /> Importar Lista
           </button>
-          <div className="w-px h-4 bg-white/10 mx-1"></div>
+          <div className="hidden md:block w-px h-4 bg-white/10 mx-1"></div>
           <button
             onClick={() => setActiveTab('cards')}
             className={cn(
-              "px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+              "flex-1 md:flex-none justify-center px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 min-w-[130px]",
               activeTab === 'cards' ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white/60"
             )}
           >
@@ -144,7 +144,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
           <button
             onClick={() => setActiveTab('stats')}
             className={cn(
-              "px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2",
+              "flex-1 md:flex-none justify-center px-6 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 min-w-[130px]",
               activeTab === 'stats' ? "bg-white text-black shadow-lg" : "text-white/40 hover:text-white/60"
             )}
           >
