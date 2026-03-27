@@ -47,6 +47,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     try {
       // Use your exact github URL here. Let's suppose WanderlanLima/mana-search
       const response = await fetch('https://api.github.com/repos/WanderlanLima/mana-search/releases/latest');
+      if (response.status === 404) {
+        // Se der 404, significa que o GitHub Actions ainda não gerou o primeiro release.
+        setDbStatus('success');
+        setTimeout(() => setDbStatus('idle'), 3000);
+        return;
+      }
       if (!response.ok) throw new Error('API Rate Limit or Repo Not Public');
       
       const release = await response.json();
