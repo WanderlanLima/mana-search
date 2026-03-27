@@ -37,4 +37,31 @@ public class NativeScannerPlugin extends Plugin {
         }
         call.reject("Scan cancelled or failed.");
     }
+
+    @PluginMethod
+    public void updateDatabase(PluginCall call) {
+        String url = call.getString("url", "");
+        if (url == null || url.isEmpty()) {
+            call.reject("URL cannot be empty");
+            return;
+        }
+
+        com.manasearch.app.scanner.data.DatabaseDownloader.Companion.downloadDatabase(
+            getContext(), 
+            url, 
+            new com.manasearch.app.scanner.data.DatabaseDownloader.DownloadCallback() {
+                @Override
+                public void onSuccess() {
+                    JSObject ret = new JSObject();
+                    ret.put("success", true);
+                    call.resolve(ret);
+                }
+
+                @Override
+                public void onError(String error) {
+                    call.reject(error);
+                }
+            }
+        );
+    }
 }

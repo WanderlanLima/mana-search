@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Key, Save, Trash2, CheckCircle2, AlertCircle, Info } from 'lucide-react';
+import { X, Key, Save, Trash2, CheckCircle2, AlertCircle, Info, Database, CloudDownload, Loader2 } from 'lucide-react';
 import { storage } from '../lib/storage';
+import { NativeScanner } from '../App';
 import { cn } from '../lib/utils';
 
 interface SettingsModalProps {
@@ -12,6 +13,10 @@ interface SettingsModalProps {
 export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose }) => {
   const [apiKey, setApiKey] = useState('');
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle');
+
+  const [dbVersion, setDbVersion] = useState(storage.getDbVersion());
+  const [latestRelease, setLatestRelease] = useState<any>(null);
+  const [dbStatus, setDbStatus] = useState<'idle' | 'checking' | 'available' | 'downloading' | 'success' | 'error'>('idle');
 
   useEffect(() => {
     if (isOpen) {
@@ -35,6 +40,51 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
     setApiKey('');
     setStatus('error'); // Usar o estado de erro/alerta para mostrar que foi limpo
     setTimeout(() => setStatus('idle'), 2000);
+  };
+
+  const checkDbUpdate = async () => {
+    setDbStatus('checking');
+    try {
+      // Use your exact github URL here. Let's suppose WanderlanLima/mana-search
+      const response = await fetch('https://api.github.com/repos/WanderlanLima/mana-search/releases/latest');
+      if (!response.ok) throw new Error('API Rate Limit or Repo Not Public');
+      
+      const release = await response.json();
+      if (!release.assets || release.assets.length === 0) throw new Error('Release has no db file');
+
+      if (release.tag_name !== dbVersion) {
+        setLatestRelease(release);
+        setDbStatus('available');
+      } else {
+        setDbStatus('success'); // Up to date
+        setTimeout(() => setDbStatus('idle'), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+      setDbStatus('error');
+      setTimeout(() => setDbStatus('idle'), 4000);
+    }
+  };
+
+  const installDbUpdate = async () => {
+    if (!latestRelease) return;
+    setDbStatus('downloading');
+    
+    try {
+      const dbAsset = latestRelease.assets.find((a: any) => a.name.includes('cards.db')) || latestRelease.assets[0];
+      const result = await NativeScanner.updateDatabase({ url: dbAsset.browser_download_url });
+      
+      if (result.success) {
+        storage.setDbVersion(latestRelease.tag_name);
+        setDbVersion(latestRelease.tag_name);
+        setDbStatus('success');
+      } else {
+        throw new Error('Native download failed');
+      }
+    } catch(err) {
+      console.error(err);
+      setDbStatus('error');
+    }
   };
 
   return (
@@ -142,6 +192,38 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose })
                   {apiKey === '' ? "Chave removida com sucesso." : "Por favor, insira uma chave válida."}
                 </motion.div>
               )}
+
+              {/* Inteligência Visual (pHash DB) */}
+              <div className="pt-6 border-t border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-white font-bold flex items-center gap-2">
+                       <Database size={16} className="text-purple-400"/>
+                       Inteligência Nativa offline
+                    </h3>
+                    <p className="text-[10px] uppercase tracking-wider text-white/40 mt-1">Versão Instalada: {dbVersion}</p>
+                  </div>
+
+                  <button 
+                    onClick={dbStatus === 'available' ? installDbUpdate : checkDbUpdate}
+                    disabled={dbStatus === 'checking' || dbStatus === 'downloading'}
+                    className="h-10 px-4 bg-purple-600 hover:bg-purple-500 active:scale-95 disabled:opacity-50 transition-all rounded-xl font-bold text-xs flex items-center gap-2"
+                  >
+                    {dbStatus === 'idle' && <>Procurar Atualização</>}
+                    {dbStatus === 'checking' && <><Loader2 size={14} className="animate-spin" /> Verificando...</>}
+                    {dbStatus === 'available' && <><CloudDownload size={14} /> Instalar {latestRelease?.tag_name}</>}
+                    {dbStatus === 'downloading' && <><Loader2 size={14} className="animate-spin" /> Instalando...</>}
+                    {dbStatus === 'success' && <><CheckCircle2 size={14} /> Atualizado</>}
+                    {dbStatus === 'error' && <><AlertCircle size={14} /> Falhou</>}
+                  </button>
+                </div>
+                
+                {dbStatus === 'available' && (
+                   <motion.div initial={{ opacity: 0}} animate={{opacity: 1}} className="p-3 bg-white/5 border border-white/10 rounded-xl">
+                      <p className="text-xs text-white/70">Uma nova versão do banco (<strong>{latestRelease.tag_name}</strong>) está disponível. O app baixará aprox. 15MB e instalará silenciosamente.</p>
+                   </motion.div>
+                )}
+              </div>
             </div>
 
             <div className="mt-8 pt-8 border-t border-white/5 text-center">

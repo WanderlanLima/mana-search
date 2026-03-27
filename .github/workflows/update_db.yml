@@ -1,0 +1,47 @@
+name: Generate Database Release
+
+on:
+  schedule:
+    # Roda toda Sexta-feira à Meia-noite (UTC)
+    - cron: '0 0 * * 5'
+  workflow_dispatch: # Permite criar versão manualmente clicando no botão no GitHub
+
+permissions:
+  contents: write
+
+jobs:
+  build_phash_db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: Install Build Tools
+        run: sudo apt-get update && sudo apt-get install -y build-essential python3
+          
+      - name: Install App Dependencies
+        run: npm install jimp sqlite3 --no-save
+        
+      - name: Extrair Nuvem Scryfall (Gerar pHash)
+        run: node scripts/generate_phash_db.cjs
+        
+      - name: Get Current Date for Tag
+        id: tag
+        run: echo "VERSION=v$(date +'%Y.%m.%d-%H%M')" >> $GITHUB_ENV
+        
+      - name: Publicar Release de Banco (CDN Gratuito)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.VERSION }}
+          name: Intelligence Engine Update ${{ env.VERSION }}
+          body: "Banco de dados SQLite extraído diretamente da API do Scryfall com pHash nativo offline."
+          files: public/cards.db
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

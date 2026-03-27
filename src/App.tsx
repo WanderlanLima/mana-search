@@ -14,8 +14,9 @@ import { App as CapacitorApp } from '@capacitor/app';
 
 export interface NativeScannerPlugin {
   startScan(options?: { apiKey?: string }): Promise<{ cardName: string }>;
+  updateDatabase(options: { url: string }): Promise<{ success: boolean }>;
 }
-const NativeScanner = registerPlugin<NativeScannerPlugin>('NativeScanner');
+export const NativeScanner = registerPlugin<NativeScannerPlugin>('NativeScanner');
 
 const CardModal = lazy(() => import('./components/CardModal').then(m => ({ default: m.CardModal })));
 const NightmareStatus = lazy(() => import('./components/NightmareStatus').then(m => ({ default: m.NightmareStatus })));
