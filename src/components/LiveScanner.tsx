@@ -188,14 +188,10 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
             />
             
             {/* Full Screen Scan Guides (Corner Brackets) */}
-            <div className="absolute inset-4 pointer-events-none flex flex-col outline-none">
-              <div className="flex-1 flex justify-between items-start">
-                  <div className="w-12 h-12 border-t-4 border-l-4 border-purple-500/50 rounded-tl-3xl opacity-50" />
-                  <div className="w-12 h-12 border-t-4 border-r-4 border-purple-500/50 rounded-tr-3xl opacity-50" />
-              </div>
-              <div className="flex-1 flex justify-between items-end">
-                  <div className="w-12 h-12 border-b-4 border-l-4 border-purple-500/50 rounded-bl-3xl opacity-50" />
-                  <div className="w-12 h-12 border-b-4 border-r-4 border-purple-500/50 rounded-br-3xl opacity-50" />
+            {/* Full-screen scanning indicator */}
+            <div className="absolute inset-4 border-2 border-purple-500/30 rounded-[32px] pointer-events-none flex items-center justify-center">
+              <div className="absolute -top-3 bg-black/80 px-6 py-1.5 rounded-full border border-purple-500/50 text-purple-400 font-bold text-xs uppercase tracking-widest shadow-[0_0_20px_rgba(168,85,247,0.3)] whitespace-nowrap">
+                Aponte para a Carta
               </div>
             </div>
 
@@ -219,7 +215,7 @@ export const LiveScanner: React.FC<LiveScannerProps> = ({ isOpen, onClose, onDet
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     className={`px-8 py-4 mb-4 rounded-full flex items-center gap-3 backdrop-blur-xl border shadow-2xl ${
-                      feedback.type === 'success' ? 'bg-green-500/20 border-green-500/50 text-green-300' :
+                      feedback.type === 'success' ? 'bg-purple-500/20 border-purple-500/50 text-purple-300' :
                       feedback.type === 'error' ? 'bg-red-500/20 border-red-500/50 text-red-300' :
                       'bg-purple-900/40 border-purple-500/40 text-purple-100'
                     }`}

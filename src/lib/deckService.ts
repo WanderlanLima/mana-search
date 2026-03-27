@@ -103,9 +103,21 @@ export class DeckService {
   async toggleCommander(cardId: number) {
     const card = await db.deckCards.get(cardId);
     if (card) {
-      await db.deckCards.update(cardId, { isCommander: !card.isCommander });
-      await db.decks.update(card.deckId, { updatedAt: Date.now() });
+      const isNowCommander = !card.isCommander;
+      await db.deckCards.update(cardId, { isCommander: isNowCommander });
+      
+      const deck = await db.decks.get(card.deckId);
+      // Auto-assign cover if none exists and this card became commander
+      if (isNowCommander && deck && !deck.coverImageUri) {
+        await db.decks.update(card.deckId, { updatedAt: Date.now(), coverImageUri: card.imageUri });
+      } else {
+        await db.decks.update(card.deckId, { updatedAt: Date.now() });
+      }
     }
+  }
+
+  async setDeckCover(deckId: number, imageUri: string) {
+    await db.decks.update(deckId, { updatedAt: Date.now(), coverImageUri: imageUri });
   }
 
   async validateDeck(deckId: number) {

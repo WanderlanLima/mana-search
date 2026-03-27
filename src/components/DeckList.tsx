@@ -195,15 +195,28 @@ export const DeckList: React.FC<DeckListProps> = ({ onSelectDeck }) => {
             key={deck.id}
             layoutId={`deck-${deck.id}`}
             onClick={() => deck.id && onSelectDeck(deck.id)}
-            className="group relative bg-white/[0.03] hover:bg-white/[0.06] border border-white/5 hover:border-white/10 rounded-[32px] p-8 transition-all cursor-pointer overflow-hidden"
+            className="group relative bg-[#0a0a0a] border border-white/5 hover:border-white/20 rounded-[32px] p-8 transition-all cursor-pointer overflow-hidden shadow-2xl"
           >
-            {/* Background Accent */}
-            <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-600/10 blur-3xl rounded-full group-hover:bg-purple-600/20 transition-all"></div>
+            {/* Background Deck Art */}
+            {deck.coverImageUri && (
+              <div 
+                className="absolute inset-0 opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 bg-cover bg-center"
+                style={{ 
+                  backgroundImage: `url('${deck.coverImageUri.replace('/normal/', '/art_crop/')}')`,
+                  maskImage: 'linear-gradient(to bottom, black 0%, black 40%, transparent 95%)',
+                  WebkitMaskImage: 'linear-gradient(to bottom, black 0%, black 40%, transparent 95%)'
+                }}
+              />
+            )}
+            
+            {/* Background Accent Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-[#0a0a0a]/40 to-transparent z-0"></div>
+            <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-600/20 blur-[50px] rounded-full group-hover:bg-purple-600/40 transition-all z-0"></div>
             
             <div className="relative z-10 space-y-6">
               <div className="flex items-start justify-between">
-                <div className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center group-hover:bg-purple-600/20 group-hover:text-purple-400 transition-all">
-                  <Book size={24} />
+                <div className="w-12 h-12 bg-black/50 backdrop-blur-md rounded-2xl flex items-center justify-center border border-white/10 group-hover:bg-purple-600/30 group-hover:border-purple-500/50 group-hover:text-purple-300 transition-all shadow-xl">
+                  {deck.coverImageUri ? <LayoutGrid size={24} /> : <Book size={24} />}
                 </div>
                 <div className="flex items-center gap-2">
                   <button

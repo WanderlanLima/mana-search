@@ -1,6 +1,6 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowLeft, Trash2, Plus, Minus, Info, BarChart3, PieChart, LayoutGrid, Layers, AlertTriangle, CheckCircle2, Languages, ExternalLink, Copy, Check, Sparkles, FileUp, X, Loader2, BrainCircuit } from 'lucide-react';
+import { ArrowLeft, Trash2, Plus, Minus, Info, BarChart3, PieChart, LayoutGrid, Layers, AlertTriangle, CheckCircle2, Languages, ExternalLink, Copy, Check, Sparkles, FileUp, X, Loader2, BrainCircuit, Image as ImageIcon } from 'lucide-react';
 import { db, DeckCard } from '../lib/db';
 import { deckService } from '../lib/deckService';
 import { analyzeDeckStrategy } from '../lib/gemini';
@@ -107,6 +107,17 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
       await deckService.toggleCommander(cardId);
     } catch (error) {
       console.error("Error toggling commander:", error);
+    }
+  };
+
+  const handleSetDeckCover = async (cardId: number) => {
+    const card = cards?.find(c => c.id === cardId);
+    if (card && deck) {
+      try {
+        await deckService.setDeckCover(deck.id!, card.imageUri);
+      } catch (error) {
+        console.error("Error setting deck cover:", error);
+      }
     }
   };
 
@@ -222,7 +233,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <h3 className="text-[10px] uppercase tracking-[0.3em] font-black text-purple-400">Comandante ({commanders.length})</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-8 xl:grid-cols-10 gap-3 sm:gap-4">
                 {commanders.map((card) => (
                   <CardItem 
                     key={card.id} 
@@ -231,6 +242,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
                     onDelete={handleDeleteCard}
                     onSelect={onSelectCard}
                     onToggleCommander={handleToggleCommander}
+                    onSetDeckCover={handleSetDeckCover}
                     deleteConfirmId={deleteConfirmId}
                     isCommanderFormat={deck.format === 'commander'}
                   />
@@ -255,7 +267,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
                     {category.title} ({sumCount})
                   </h3>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-4">
                   {category.data.map((card) => (
                     <CardItem 
                       key={card.id} 
@@ -264,6 +276,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
                       onDelete={handleDeleteCard}
                       onSelect={onSelectCard}
                       onToggleCommander={handleToggleCommander}
+                      onSetDeckCover={handleSetDeckCover}
                       deleteConfirmId={deleteConfirmId}
                       isCommanderFormat={deck.format === 'commander'}
                     />
@@ -279,7 +292,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
               <div className="flex items-center justify-between border-b border-white/5 pb-4">
                 <h3 className="text-[10px] uppercase tracking-[0.3em] font-black text-white/20">Sideboard ({validation?.counts.side || 0})</h3>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2 sm:gap-4">
                 {sideboard.map((card) => (
                   <CardItem 
                     key={card.id} 
@@ -287,6 +300,7 @@ export const DeckView: React.FC<DeckViewProps> = ({ deckId, onBack, onSelectCard
                     onQuantityChange={handleQuantityChange}
                     onDelete={handleDeleteCard}
                     onSelect={onSelectCard}
+                    onSetDeckCover={handleSetDeckCover}
                     deleteConfirmId={deleteConfirmId}
                   />
                 ))}
@@ -582,15 +596,18 @@ const ImportModal: React.FC<{ deckId: number; onClose: () => void }> = ({ deckId
   );
 };
 
-const CardItem: React.FC<{
+type CardItemProps = {
   card: DeckCard;
   onQuantityChange: (id: number, delta: number) => void;
   onDelete: (id: number) => void;
   onSelect: (id: string) => void;
   onToggleCommander?: (id: number) => void;
+  onSetDeckCover?: (id: number) => void;
   deleteConfirmId: number | null;
   isCommanderFormat?: boolean;
-}> = ({ card, onQuantityChange, onDelete, onSelect, onToggleCommander, deleteConfirmId, isCommanderFormat }) => {
+};
+
+const CardItem = React.memo<CardItemProps>(({ card, onQuantityChange, onDelete, onSelect, onToggleCommander, onSetDeckCover, deleteConfirmId, isCommanderFormat }) => {
   return (
     <motion.div
       layout
@@ -643,8 +660,8 @@ const CardItem: React.FC<{
           <span className="text-[10px] font-mono text-white/40 mt-0.5 shrink-0">{card.manaCost}</span>
         </div>
         <p className="text-[10px] text-white/20 truncate uppercase tracking-widest">{card.typeLine}</p>
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex items-center p-1 bg-white/5 rounded-xl border border-white/5">
+        <div className="flex flex-wrap items-center justify-between pt-1 gap-y-2 gap-x-1">
+          <div className="flex items-center p-1 bg-white/5 rounded-xl border border-white/5 shrink-0">
             <button
               onClick={() => card.id && onQuantityChange(card.id, -1)}
               className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
@@ -660,29 +677,39 @@ const CardItem: React.FC<{
             </button>
           </div>
           
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0 ml-auto bg-black/20 p-1 rounded-xl">
             {isCommanderFormat && onToggleCommander && (
               <button
                 onClick={() => card.id && onToggleCommander(card.id)}
                 className={cn(
-                  "p-2 rounded-xl transition-all",
+                  "p-2 rounded-lg transition-all",
                   card.isCommander 
-                    ? "bg-purple-600 text-white" 
-                    : "text-white/10 hover:text-purple-400 hover:bg-purple-400/10"
+                    ? "bg-purple-600 text-white shadow-lg shadow-purple-500/20" 
+                    : "text-white/40 hover:text-purple-400 hover:bg-purple-400/10"
                 )}
                 title={card.isCommander ? "Remover Comandante" : "Definir como Comandante"}
               >
                 <Sparkles size={14} />
               </button>
             )}
+            {onSetDeckCover && (
+              <button
+                onClick={() => card.id && onSetDeckCover(card.id)}
+                className="p-2 transition-all rounded-lg text-white/40 hover:text-blue-400 hover:bg-blue-400/10"
+                title="Definir arte como Capa do Deck"
+              >
+                <ImageIcon size={14} />
+              </button>
+            )}
             <button
               onClick={() => card.id && onDelete(card.id)}
               className={cn(
-                "p-2 transition-all rounded-xl",
+                "p-2 transition-all rounded-lg",
                 deleteConfirmId === card.id 
-                  ? "bg-red-500 text-white scale-110" 
-                  : "text-white/10 hover:text-red-400"
+                  ? "bg-red-500 text-white scale-110 shadow-lg shadow-red-500/20" 
+                  : "text-white/40 hover:text-red-400 hover:bg-red-400/10"
               )}
+              title="Excluir do Deck"
             >
               <Trash2 size={14} />
             </button>
@@ -691,4 +718,10 @@ const CardItem: React.FC<{
       </div>
     </motion.div>
   );
-};
+}, (prev, next) => {
+  return prev.card.id === next.card.id &&
+         prev.card.quantity === next.card.quantity &&
+         prev.card.isCommander === next.card.isCommander &&
+         prev.deleteConfirmId === next.deleteConfirmId &&
+         prev.isCommanderFormat === next.isCommanderFormat;
+});

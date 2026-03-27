@@ -12,6 +12,7 @@ export interface Deck {
   createdAt: number;
   updatedAt: number;
   notes?: string;
+  coverImageUri?: string; // Offline Image Cache
 }
 
 export interface DeckCard {

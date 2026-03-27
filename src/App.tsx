@@ -7,7 +7,15 @@ import { DeckList } from './components/DeckList';
 import { DeckView } from './components/DeckView';
 import { cn } from './lib/utils';
 import { keywordService } from './lib/keywordService';
+import { storage } from './lib/storage';
 import { useStore } from './store/useStore';
+import { Capacitor, registerPlugin } from '@capacitor/core';
+import { App as CapacitorApp } from '@capacitor/app';
+
+export interface NativeScannerPlugin {
+  startScan(options?: { apiKey?: string }): Promise<{ cardName: string }>;
+}
+const NativeScanner = registerPlugin<NativeScannerPlugin>('NativeScanner');
 
 const CardModal = lazy(() => import('./components/CardModal').then(m => ({ default: m.CardModal })));
 const NightmareStatus = lazy(() => import('./components/NightmareStatus').then(m => ({ default: m.NightmareStatus })));
@@ -72,6 +80,37 @@ export default function App() {
 
     return () => clearTimeout(timer);
   }, [query]);
+
+  // Android Native Back Button Interceptor
+  useEffect(() => {
+    if (Capacitor.isNativePlatform()) {
+      const backListener = CapacitorApp.addListener('backButton', ({ canGoBack }) => {
+        // Cascade closing sequence to avoid exiting the app prematurely
+        if (selectedCard) {
+          setSelectedCard(null);
+        } else if (isCameraOpen) {
+          setIsCameraOpen(false);
+        } else if (isSettingsOpen) {
+          setIsSettingsOpen(false);
+        } else if (isNightmareOpen) {
+          setIsNightmareOpen(false);
+        } else if (showKeywordsOnly) {
+          setShowKeywordsOnly(false);
+        } else if (selectedDeckId) {
+          setSelectedDeckId(null);
+        } else if (showDropdown) {
+          setShowDropdown(false);
+        } else if (activeTab !== 'search') {
+          setActiveTab('search');
+        } else {
+          CapacitorApp.exitApp();
+        }
+      });
+      return () => {
+        backListener.then(listener => listener.remove());
+      };
+    }
+  }, [selectedCard, isCameraOpen, isSettingsOpen, isNightmareOpen, showKeywordsOnly, selectedDeckId, showDropdown, activeTab]);
 
   const saveToHistory = (q: string) => {
     if (!q.trim()) return;
@@ -138,6 +177,35 @@ export default function App() {
     setError(null);
   };
 
+  const handleOpenScanner = async () => {
+    if (Capacitor.isNativePlatform()) {
+      try {
+        const apiKey = storage.getGeminiKey() || "";
+        const result = await NativeScanner.startScan({ apiKey });
+        if (result && result.cardName) {
+          setQuery(result.cardName);
+          setLoading(true);
+          try {
+            // Strict precise query ensures we get the exact visual version safely
+            const data = await scryfall.search(`!"${result.cardName}"`, 1);
+            if (data.data.length > 0) {
+              setCards(data.data);
+              setSelectedCard(data.data[0]); // INSTANT MODAL OPEN
+            }
+          } catch(e) {
+            console.error(e);
+          } finally {
+            setLoading(false);
+          }
+        }
+      } catch (e) {
+        console.log("Scanner cancelado ou A.I. Engine com erro interno", e);
+      }
+    } else {
+      setIsCameraOpen(true); // Fallback: PWA JS Scanner
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0e0e11] text-[#f0edf1] selection:bg-[#d095ff]/30 font-sans">
       {/* Background Effects */}
@@ -189,11 +257,11 @@ export default function App() {
             </nav>
             <div className="flex items-center gap-2">
               <button
-                onClick={() => setIsCameraOpen(true)}
-                className="p-2.5 sm:px-6 sm:py-3 glass-surface hover:bg-white/10 rounded-full text-sm font-medium transition-all duration-300 flex items-center gap-2 text-[#d095ff] glow-purple hover:glow-purple-strong shadow-lg border border-[#d095ff]/20"
+                onClick={() => setIsNightmareOpen(true)}
+                className="p-2.5 glass-surface hover:bg-white/10 rounded-full transition-colors border border-white/5"
+                title="Status"
               >
-                <Camera size={18} />
-                <span className="hidden sm:inline tracking-wide">Escanear</span>
+                <Ghost size={20} className="text-[#f0edf1]/80" />
               </button>
               <button
                 onClick={() => setIsSettingsOpen(true)}
@@ -273,14 +341,6 @@ export default function App() {
                   placeholder="Search cards (e.g. Yuriko, Tiger's Shadow)"
                   className="w-full bg-transparent border-none focus:ring-0 px-4 py-4 text-lg placeholder:text-white/20"
                 />
-                <button
-                  type="button"
-                  onClick={() => setIsCameraOpen(true)}
-                  className="p-3 text-white/40 hover:text-purple-400 transition-colors"
-                  title="Scan Card"
-                >
-                  <Camera size={24} />
-                </button>
                 <button
                   type="submit"
                   disabled={loading}
@@ -570,6 +630,15 @@ export default function App() {
             <Search size={20} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Search</span>
           </button>
+          
+          <button
+            onClick={handleOpenScanner}
+            className="flex flex-col items-center gap-1 transition-colors text-white/40 hover:text-purple-400"
+          >
+            <Camera size={20} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Scan</span>
+          </button>
+
           <button
             onClick={() => {
               setActiveTab('decks');
@@ -583,15 +652,6 @@ export default function App() {
           >
             <Layout size={20} />
             <span className="text-[10px] font-bold uppercase tracking-wider">Decks</span>
-          </button>
-          <button
-            onClick={() => {
-              setIsNightmareOpen(true);
-            }}
-            className="flex flex-col items-center gap-1 text-white/40"
-          >
-            <Ghost size={20} />
-            <span className="text-[10px] font-bold uppercase tracking-wider">Status</span>
           </button>
         </div>
       </div>
