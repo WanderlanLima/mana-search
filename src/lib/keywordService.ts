@@ -64,13 +64,20 @@ class KeywordService {
 
     this.initPromise = (async () => {
       try {
-        // 🌙 Fetch keywords from our static JSON file
-        // Using a more robust path for GitHub Pages compatibility
-        const basePath = import.meta.env.BASE_URL || './';
-        const url = `${basePath.endsWith('/') ? basePath : basePath + '/'}keywords.json`.replace(/\/+/g, '/');
+        // 🌙 Fetch keywords silently from the OFFICIAL CLOUD REPOSITORY first
+        // Fails back to local bundling or cached version if offline
+        const GITHUB_RAW_URL = 'https://raw.githubusercontent.com/WanderlanLima/mana-search/main/public/keywords.json';
         
-        console.log(`KeywordService: Fetching keywords from ${url}`);
-        const response = await fetch(url);
+        console.log(`KeywordService: Fast-Syncing from Official GitHub Cloud Data...`);
+        let response;
+        try {
+          response = await fetch(GITHUB_RAW_URL, { cache: "no-cache" });
+        } catch (e) {
+          // You're probably offline, fall back to local bundled version
+          const basePath = import.meta.env.BASE_URL || './';
+          const localUrl = `${basePath.endsWith('/') ? basePath : basePath + '/'}keywords.json`.replace(/\/+/g, '/');
+          response = await fetch(localUrl);
+        }
         
         if (!response.ok) {
           throw new Error(`Failed to fetch keywords: ${response.status} ${response.statusText}`);

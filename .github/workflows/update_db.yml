@@ -27,7 +27,12 @@ jobs:
       - name: Install App Dependencies
         run: npm install jimp sqlite3 --no-save
         
-      - name: Extrair Nuvem Scryfall (Gerar pHash)
+      - name: Tradutor Gemini 100% PT-BR de Keywords
+        run: node scripts/generate_keywords.cjs
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          
+      - name: Extrair Nuvem Scryfall Automáticamente (Gerar pHash)
         run: node scripts/generate_phash_db.cjs
         
       - name: Get Current Date for Tag
@@ -39,8 +44,10 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           name: Intelligence Engine Update ${{ env.VERSION }}
-          body: "Banco de dados SQLite extraído diretamente da API do Scryfall com pHash nativo offline."
-          files: public/cards.db
+          body: "Banco de dados SQLite extraído diretamente da API do Scryfall com pHash nativo offline.\n- Adicionado catálogo 100% PT-BR de Keywords auto-geradas por IA."
+          files: |
+            public/cards.db
+            public/keywords.json
           draft: false
           prerelease: false
         env:
